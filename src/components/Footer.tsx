@@ -73,7 +73,8 @@ export default function Footer() {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          style={{ backgroundColor: "#25D366" }}
           title="WhatsApp"
         >
           <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6">
@@ -84,7 +85,8 @@ export default function Footer() {
           href="https://www.facebook.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          style={{ backgroundColor: "#1877F2" }}
           title="Facebook"
         >
           <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6">
