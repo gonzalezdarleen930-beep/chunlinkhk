@@ -1,7 +1,7 @@
 import heroBanner from "@/assets/hero-banner.jpg";
 import { useState } from "react";
 
-const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85296396851&text&type=phone_number&app_absent=0";
+const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
 const MONTHS = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36];
 
