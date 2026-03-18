@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
-const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85296396851&text&type=phone_number&app_absent=0";
+const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
 const navLinks = [
   { label: "首頁", href: "/", hash: "" },
