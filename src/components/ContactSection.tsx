@@ -83,11 +83,11 @@ export default function ContactSection() {
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-3">
                   <span className="text-primary mt-0.5">📞</span>
-                  <span>(852) 2391 2301</span>
+                  <span>(852) 96396851</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-primary mt-0.5">✉️</span>
-                  <span>chunlinkhk@gmail.com</span>
+                  <span>contact@grit-credit.com</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-primary mt-0.5">📍</span>
@@ -102,7 +102,7 @@ export default function ContactSection() {
             {/* Google Map Embed */}
             <div className="rounded-xl overflow-hidden border border-border h-64">
               <iframe
-                title="駿嶺香港有限公司地圖"
+                title="富毅信貸有限公司地圖"
                 src="https://maps.google.com/maps?q=九龍旺角彌敦道610號荷李活商業中心&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 className="w-full h-full"
                 loading="lazy"

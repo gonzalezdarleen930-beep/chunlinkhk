@@ -1,8 +1,7 @@
 import heroBanner from "@/assets/hero-banner.jpg";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
-const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85257924047&text&type=phone_number&app_absent=0";
+const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85296396851&text&type=phone_number&app_absent=0";
 
 const MONTHS = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36];
 
@@ -28,7 +27,7 @@ export default function HeroSection() {
       <section className="relative min-h-[480px] md:min-h-[560px] flex items-center overflow-hidden">
         <img
           src={heroBanner}
-          alt="駿嶺香港有限公司"
+          alt="富毅信貸有限公司"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/30" />
