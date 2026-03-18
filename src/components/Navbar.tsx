@@ -1,21 +1,44 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
-const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85257924047&text&type=phone_number&app_absent=0";
+const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85296396851&text&type=phone_number&app_absent=0";
 
 const navLinks = [
-  { label: "首頁", href: "/" },
-  { label: "關於我們", href: "/#about" },
-  { label: "貸款優勢", href: "/#advantages" },
-  { label: "私隱政策", href: "/PrivacyPolicy" },
-  { label: "聯絡我們", href: "/#contact" },
-  { label: "線上申請", href: "/online" },
+  { label: "首頁", href: "/", hash: "" },
+  { label: "關於我們", href: "/", hash: "about" },
+  { label: "貸款優勢", href: "/", hash: "advantages" },
+  { label: "私隱政策", href: "/PrivacyPolicy", hash: "" },
+  { label: "聯絡我們", href: "/", hash: "contact" },
+  { label: "線上申請", href: "/online", hash: "" },
 ];
+
+function scrollToSection(id: string) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
+  }
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  function handleNavClick(e: React.MouseEvent, link: typeof navLinks[0]) {
+    if (link.hash) {
+      e.preventDefault();
+      setOpen(false);
+      if (location.pathname === "/") {
+        scrollToSection(link.hash);
+      } else {
+        navigate("/");
+        setTimeout(() => scrollToSection(link.hash), 100);
+      }
+    } else {
+      setOpen(false);
+    }
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
@@ -25,11 +48,11 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">駿</span>
+                <span className="text-primary-foreground font-bold text-sm">富</span>
               </div>
               <div className="hidden sm:block">
-                <div className="text-sm font-bold text-foreground leading-tight">駿嶺香港有限公司</div>
-                <div className="text-xs text-muted-foreground leading-tight">CHUN LINK HONG KONG LIMITED</div>
+                <div className="text-sm font-bold text-foreground leading-tight">富毅信貸有限公司</div>
+                <div className="text-xs text-muted-foreground leading-tight">GRIT CREDIT LIMITED</div>
               </div>
             </div>
           </Link>
@@ -38,10 +61,11 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
-                key={link.href}
-                to={link.href}
+                key={link.label}
+                to={link.hash ? `/#${link.hash}` : link.href}
+                onClick={(e) => handleNavClick(e, link)}
                 className={`px-3 py-2 text-sm rounded-md transition-colors hover:text-primary ${
-                  location.pathname === link.href
+                  !link.hash && location.pathname === link.href
                     ? "text-primary font-medium"
                     : "text-foreground"
                 }`}
@@ -79,9 +103,9 @@ export default function Navbar() {
           <div className="px-4 py-3 space-y-1">
             {navLinks.map((link) => (
               <Link
-                key={link.href}
-                to={link.href}
-                onClick={() => setOpen(false)}
+                key={link.label}
+                to={link.hash ? `/#${link.hash}` : link.href}
+                onClick={(e) => handleNavClick(e, link)}
                 className="block px-3 py-2 text-sm rounded-md text-foreground hover:text-primary hover:bg-muted transition-colors"
               >
                 {link.label}

@@ -1,4 +1,4 @@
-const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85257924047&text&type=phone_number&app_absent=0";
+const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=85296396851&text&type=phone_number&app_absent=0";
 
 export default function AboutSection() {
   return (
