@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
@@ -24,6 +25,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAdmin, signOut } = useAuth();
 
   function handleNavClick(e: React.MouseEvent, link: typeof navLinks[0]) {
     if (link.hash) {
@@ -38,6 +40,12 @@ export default function Navbar() {
     } else {
       setOpen(false);
     }
+  }
+
+  async function handleSignOut() {
+    setOpen(false);
+    await signOut();
+    navigate("/");
   }
 
   return (
@@ -75,8 +83,34 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* CTA */}
-          <div className="hidden md:block">
+          {/* Right: Login + CTA */}
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-md text-foreground hover:text-primary transition-colors"
+                >
+                  <User size={14} />
+                  {isAdmin ? "管理員" : "我的帳戶"}
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-md text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <LogOut size={14} />
+                  登出
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-primary text-primary text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                <User size={14} />
+                會員登入
+              </Link>
+            )}
             <a
               href={WHATSAPP_URL}
               target="_blank"
@@ -111,6 +145,34 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-md text-foreground hover:text-primary hover:bg-muted"
+                >
+                  <User size={14} />
+                  {isAdmin ? "管理員面板" : "我的帳戶"}
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1.5 w-full text-left px-3 py-2 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                >
+                  <LogOut size={14} />
+                  登出
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-md border border-primary text-primary hover:bg-primary/10"
+              >
+                <User size={14} />
+                會員登入
+              </Link>
+            )}
             <a
               href={WHATSAPP_URL}
               target="_blank"
