@@ -9,6 +9,10 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Termsofuse from "./pages/Termsofuse";
 import MoneyLendersOrdinance from "./pages/MoneyLendersOrdinance";
 import Online from "./pages/Online";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
+import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -18,15 +22,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
-          <Route path="/Termsofuse" element={<Termsofuse />} />
-          <Route path="/MoneyLendersOrdinance" element={<MoneyLendersOrdinance />} />
-          <Route path="/online" element={<Online />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
+            <Route path="/Termsofuse" element={<Termsofuse />} />
+            <Route path="/MoneyLendersOrdinance" element={<MoneyLendersOrdinance />} />
+            <Route path="/online" element={<Online />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<Admin />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
