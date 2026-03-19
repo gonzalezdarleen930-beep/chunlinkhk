@@ -188,9 +188,6 @@ export default function Navbar() {
   );
 }
 
-const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
-
-const navLinks = [
   { label: "首頁", href: "/", hash: "" },
   { label: "關於我們", href: "/", hash: "about" },
   { label: "貸款優勢", href: "/", hash: "advantages" },
