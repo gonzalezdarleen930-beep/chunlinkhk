@@ -273,7 +273,7 @@ export default function Admin() {
 
         {/* Member success message */}
         {memberSuccess && (
-          <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700">
+          <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3 text-sm text-primary font-medium">
             {memberSuccess}
           </div>
         )}
