@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Edit2, X, Check, LogOut } from "lucide-react";
+import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown } from "lucide-react";
 
 interface MemberUser {
   id: string;
@@ -28,7 +28,7 @@ interface LoanAccount {
 
 const EMPTY_LOAN: Omit<LoanAccount, "id"> = {
   user_id: "",
-  loan_number: "123456",
+  loan_number: "",
   loan_amount: 100000,
   outstanding_principal: 100000,
   total_outstanding: 100000,
@@ -38,7 +38,7 @@ const EMPTY_LOAN: Omit<LoanAccount, "id"> = {
   loan_date: "2026-01-01",
   loan_expiry_date: "2028-01-01",
   repayment_bank: "眾安銀行",
-  repayment_account: "123144",
+  repayment_account: "",
   repayment_day: 10,
 };
 
@@ -56,6 +56,7 @@ export default function Admin() {
   const [newPassword, setNewPassword] = useState("");
   const [memberError, setMemberError] = useState("");
   const [memberLoading, setMemberLoading] = useState(false);
+  const [memberSuccess, setMemberSuccess] = useState("");
 
   // Loan form
   const [showLoanForm, setShowLoanForm] = useState(false);
@@ -63,6 +64,9 @@ export default function Admin() {
   const [loanForm, setLoanForm] = useState<Omit<LoanAccount, "id">>(EMPTY_LOAN);
   const [loanError, setLoanError] = useState("");
   const [loanLoading, setLoanLoading] = useState(false);
+
+  // Selected member for filtering
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("all");
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -75,41 +79,33 @@ export default function Admin() {
     fetchData();
   }, [user, isAdmin]);
 
-  async function fetchData() {
-    setFetching(true);
-    // Fetch members via edge function (admin only)
-    const { data: loansData } = await supabase
+  async function fetchMembers() {
+    const { data, error } = await supabase.functions.invoke("list-members");
+    if (!error && data?.members) {
+      setMembers(data.members);
+    }
+  }
+
+  async function fetchLoans() {
+    const { data } = await supabase
       .from("loan_accounts")
       .select("*")
       .order("created_at", { ascending: false });
-    setLoans(loansData ?? []);
+    setLoans(data ?? []);
+  }
 
-    // Get unique user_ids from loans to display members
-    const { data: rolesData } = await supabase
-      .from("user_roles")
-      .select("user_id, role")
-      .eq("role", "member");
-
-    if (rolesData) {
-      // We'll show members from user_roles; we can't list auth.users directly from client
-      // Instead store email in loan_accounts or use a profiles approach
-      // For now, we derive them from loans
-      const userIds = [...new Set((loansData ?? []).map((l: LoanAccount) => l.user_id))];
-      const memberList = userIds.map((id) => {
-        const loan = loansData?.find((l: LoanAccount) => l.user_id === id);
-        return { id, email: `會員 (${id.slice(0, 8)}...)` };
-      });
-      setMembers(memberList);
-    }
+  async function fetchData() {
+    setFetching(true);
+    await Promise.all([fetchMembers(), fetchLoans()]);
     setFetching(false);
   }
 
   async function handleCreateMember(e: React.FormEvent) {
     e.preventDefault();
     setMemberError("");
+    setMemberSuccess("");
     setMemberLoading(true);
 
-    // Use admin edge function to create user
     const { data, error } = await supabase.functions.invoke("create-member", {
       body: { email: newEmail, password: newPassword },
     });
@@ -117,10 +113,11 @@ export default function Admin() {
     if (error || data?.error) {
       setMemberError(data?.error || "建立會員失敗，請重試。");
     } else {
-      setShowNewMember(false);
+      setMemberSuccess(`✅ 已成功建立會員：${data.email}`);
       setNewEmail("");
       setNewPassword("");
-      fetchData();
+      setShowNewMember(false);
+      await fetchMembers();
     }
     setMemberLoading(false);
   }
@@ -142,36 +139,52 @@ export default function Admin() {
   async function handleSaveLoan(e: React.FormEvent) {
     e.preventDefault();
     if (!loanForm.user_id) {
-      setLoanError("請輸入會員 User ID");
+      setLoanError("請選擇會員");
       return;
     }
     setLoanLoading(true);
     setLoanError("");
+
+    let saveError = null;
 
     if (editingLoan) {
       const { error } = await supabase
         .from("loan_accounts")
         .update(loanForm)
         .eq("id", editingLoan.id);
-      if (error) setLoanError("更新失敗: " + error.message);
+      saveError = error;
     } else {
       const { error } = await supabase
         .from("loan_accounts")
         .insert([loanForm]);
-      if (error) setLoanError("新增失敗: " + error.message);
+      saveError = error;
     }
 
     setLoanLoading(false);
-    if (!loanError) {
+
+    if (saveError) {
+      setLoanError("儲存失敗: " + saveError.message);
+    } else {
       setShowLoanForm(false);
-      fetchData();
+      setEditingLoan(null);
+      await fetchLoans();
     }
   }
 
   async function handleDeleteLoan(id: string) {
     if (!confirm("確定刪除此貸款記錄？")) return;
     await supabase.from("loan_accounts").delete().eq("id", id);
-    fetchData();
+    await fetchLoans();
+  }
+
+  async function handleDeleteMember(memberId: string, memberEmail: string) {
+    if (!confirm(`確定刪除會員 ${memberEmail}？此操作不可撤銷。`)) return;
+    // Delete their loans first
+    await supabase.from("loan_accounts").delete().eq("user_id", memberId);
+    // Delete role
+    await supabase.from("user_roles").delete().eq("user_id", memberId);
+    // We can't delete from auth.users client-side, but removing role is sufficient
+    await fetchData();
   }
 
   async function handleSignOut() {
@@ -179,15 +192,27 @@ export default function Admin() {
     navigate("/");
   }
 
+  const getMemberEmail = (userId: string) =>
+    members.find((m) => m.id === userId)?.email ?? userId.slice(0, 12) + "...";
+
+  const filteredLoans =
+    selectedMemberId === "all"
+      ? loans
+      : loans.filter((l) => l.user_id === selectedMemberId);
+
   if (loading || fetching) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted">
-        <p className="text-muted-foreground">載入中...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">載入中...</p>
+        </div>
       </div>
     );
   }
 
-  const inputClass = "w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  const inputClass =
+    "w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   const labelClass = "block text-xs font-medium text-foreground mb-1";
 
   return (
@@ -205,7 +230,10 @@ export default function Admin() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              to="/dashboard"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
+            >
               會員儀表板
             </Link>
             <button
@@ -219,14 +247,50 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
-        {/* Create Member Section */}
+        {/* Stats bar */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-card rounded-xl border border-border px-5 py-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Users size={18} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">會員總數</p>
+              <p className="text-2xl font-bold text-foreground">{members.length}</p>
+            </div>
+          </div>
+          <div className="bg-card rounded-xl border border-border px-5 py-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <CreditCard size={18} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">貸款記錄</p>
+              <p className="text-2xl font-bold text-foreground">{loans.length}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Member success message */}
+        {memberSuccess && (
+          <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3 text-sm text-primary font-medium">
+            {memberSuccess}
+          </div>
+        )}
+
+        {/* Members Section */}
         <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">建立新會員帳號</h2>
+            <div className="flex items-center gap-2">
+              <Users size={16} className="text-primary" />
+              <h2 className="font-semibold text-foreground">會員管理</h2>
+            </div>
             <button
-              onClick={() => { setShowNewMember(!showNewMember); setMemberError(""); }}
+              onClick={() => {
+                setShowNewMember(!showNewMember);
+                setMemberError("");
+                setMemberSuccess("");
+              }}
               className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
             >
               {showNewMember ? <X size={14} /> : <Plus size={14} />}
@@ -234,8 +298,10 @@ export default function Admin() {
             </button>
           </div>
 
+          {/* New member form */}
           {showNewMember && (
-            <form onSubmit={handleCreateMember} className="px-6 py-5 space-y-4">
+            <form onSubmit={handleCreateMember} className="px-6 py-5 border-b border-border bg-muted/30 space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">建立新會員帳號</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>電郵地址</label>
@@ -271,19 +337,79 @@ export default function Admin() {
               </button>
             </form>
           )}
+
+          {/* Members list */}
+          <div className="divide-y divide-border">
+            {members.length === 0 ? (
+              <div className="px-6 py-8 text-center text-muted-foreground text-sm">
+                暫時未有會員
+              </div>
+            ) : (
+              members.map((member) => {
+                const memberLoans = loans.filter((l) => l.user_id === member.id);
+                return (
+                  <div key={member.id} className="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="font-medium text-foreground truncate">{member.email}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {memberLoans.length > 0
+                          ? `${memberLoans.length} 筆貸款 · 編號: ${memberLoans.map(l => l.loan_number).join(", ")}`
+                          : "未有貸款記錄"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => openNewLoan(member.id)}
+                        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                      >
+                        <Plus size={12} />
+                        新增貸款
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMember(member.id, member.email)}
+                        className="p-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"
+                        title="刪除會員"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </section>
 
         {/* Loan Accounts Section */}
         <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">貸款帳戶管理</h2>
-            <button
-              onClick={() => openNewLoan()}
-              className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
-            >
-              <Plus size={14} />
-              新增貸款
-            </button>
+          <div className="px-6 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <CreditCard size={16} className="text-primary" />
+              <h2 className="font-semibold text-foreground">貸款帳戶管理</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Member filter */}
+              <div className="relative">
+                <select
+                  value={selectedMemberId}
+                  onChange={(e) => setSelectedMemberId(e.target.value)}
+                  className="h-8 rounded-md border border-input bg-background pl-3 pr-7 text-xs appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="all">所有會員</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.id}>{m.email}</option>
+                  ))}
+                </select>
+                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              </div>
+              <button
+                onClick={() => openNewLoan()}
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+              >
+                <Plus size={14} />
+                新增貸款
+              </button>
+            </div>
           </div>
 
           {/* Loan Form */}
@@ -294,13 +420,28 @@ export default function Admin() {
               </h3>
               <form onSubmit={handleSaveLoan} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div>
-                    <label className={labelClass}>會員 User ID *</label>
-                    <input type="text" value={loanForm.user_id} onChange={(e) => setLoanForm({ ...loanForm, user_id: e.target.value })} required className={inputClass} placeholder="貼上會員的 UUID" />
+                  {/* Member selector */}
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <label className={labelClass}>選擇會員 *</label>
+                    <div className="relative">
+                      <select
+                        value={loanForm.user_id}
+                        onChange={(e) => setLoanForm({ ...loanForm, user_id: e.target.value })}
+                        required
+                        className={inputClass + " appearance-none pr-8"}
+                      >
+                        <option value="">-- 請選擇會員 --</option>
+                        {members.map((m) => (
+                          <option key={m.id} value={m.id}>{m.email}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
                   </div>
+
                   <div>
                     <label className={labelClass}>貸款編號</label>
-                    <input type="text" value={loanForm.loan_number} onChange={(e) => setLoanForm({ ...loanForm, loan_number: e.target.value })} required className={inputClass} />
+                    <input type="text" value={loanForm.loan_number} onChange={(e) => setLoanForm({ ...loanForm, loan_number: e.target.value })} required className={inputClass} placeholder="例：123456" />
                   </div>
                   <div>
                     <label className={labelClass}>貸款額 (HKD)</label>
@@ -339,7 +480,7 @@ export default function Admin() {
                     <input type="text" value={loanForm.repayment_bank} onChange={(e) => setLoanForm({ ...loanForm, repayment_bank: e.target.value })} required className={inputClass} />
                   </div>
                   <div>
-                    <label className={labelClass}>還款帳戶</label>
+                    <label className={labelClass}>還款帳戶號碼</label>
                     <input type="text" value={loanForm.repayment_account} onChange={(e) => setLoanForm({ ...loanForm, repayment_account: e.target.value })} required className={inputClass} />
                   </div>
                   <div>
@@ -353,7 +494,7 @@ export default function Admin() {
                     <Check size={14} />
                     {loanLoading ? "儲存中..." : "儲存"}
                   </button>
-                  <button type="button" onClick={() => setShowLoanForm(false)} className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted">
+                  <button type="button" onClick={() => { setShowLoanForm(false); setEditingLoan(null); }} className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted">
                     <X size={14} />
                     取消
                   </button>
@@ -364,55 +505,43 @@ export default function Admin() {
 
           {/* Loans list */}
           <div className="divide-y divide-border">
-            {loans.length === 0 ? (
-              <div className="px-6 py-8 text-center text-muted-foreground text-sm">
-                暫時未有貸款記錄
+            {filteredLoans.length === 0 ? (
+              <div className="px-6 py-10 text-center text-muted-foreground text-sm">
+                {selectedMemberId === "all" ? "暫時未有貸款記錄" : "此會員暫時未有貸款記錄"}
               </div>
             ) : (
-              loans.map((loan) => (
-                <div key={loan.id} className="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">#{loan.loan_number}</span>
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        HKD {Number(loan.loan_amount).toLocaleString()}
-                      </span>
+              filteredLoans.map((loan) => (
+                <div key={loan.id} className="px-6 py-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-foreground">貸款編號 #{loan.loan_number}</span>
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                          HKD {Number(loan.loan_amount).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground font-medium">{getMemberEmail(loan.user_id)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {loan.loan_date} → {loan.loan_expiry_date} · 餘下 {loan.remaining_periods}期 · 每月 HKD {Number(loan.monthly_payment).toLocaleString()}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">User: {loan.user_id.slice(0, 16)}...</p>
-                    <p className="text-xs text-muted-foreground">
-                      {loan.loan_date} → {loan.loan_expiry_date} · 每月 HKD {Number(loan.monthly_payment).toLocaleString()}
-                    </p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => openEditLoan(loan)}
+                        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-border hover:bg-muted transition-colors text-foreground"
+                      >
+                        <Edit2 size={12} />
+                        編輯
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLoan(loan.id)}
+                        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"
+                      >
+                        <Trash2 size={12} />
+                        刪除
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => openEditLoan(loan)} className="p-2 rounded-md border border-border hover:bg-muted transition-colors text-foreground">
-                      <Edit2 size={14} />
-                    </button>
-                    <button onClick={() => handleDeleteLoan(loan.id)} className="p-2 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive">
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
-        {/* User IDs helper */}
-        <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground">已登記貸款的會員 User IDs</h2>
-            <p className="text-xs text-muted-foreground mt-1">新增貸款時需要填入對應的 User ID</p>
-          </div>
-          <div className="divide-y divide-border">
-            {loans.length === 0 ? (
-              <p className="px-6 py-4 text-sm text-muted-foreground">無記錄</p>
-            ) : (
-              [...new Map(loans.map(l => [l.user_id, l])).values()].map((loan) => (
-                <div key={loan.user_id} className="px-6 py-3 flex items-center justify-between">
-                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground select-all">
-                    {loan.user_id}
-                  </code>
-                  <span className="text-xs text-muted-foreground ml-4">#{loan.loan_number}</span>
                 </div>
               ))
             )}
