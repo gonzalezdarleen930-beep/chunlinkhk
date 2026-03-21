@@ -586,6 +586,67 @@ export default function Admin() {
         </section>
 
       </main>
+
+      {/* Change Password Modal */}
+      {changePwMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="bg-card rounded-xl border border-border shadow-xl w-full max-w-sm p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-foreground text-base">修改登入密碼</h3>
+                <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[240px]">{changePwMember.email}</p>
+              </div>
+              <button
+                onClick={() => { setChangePwMember(null); setNewPw(""); setPwError(""); setPwSuccess(""); }}
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {pwSuccess ? (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3 text-sm text-primary font-medium text-center">
+                {pwSuccess}
+              </div>
+            ) : (
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">新密碼</label>
+                  <input
+                    type="text"
+                    value={newPw}
+                    onChange={(e) => setNewPw(e.target.value)}
+                    required
+                    minLength={6}
+                    className="w-full h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="請輸入新密碼（最少6位）"
+                    autoComplete="new-password"
+                  />
+                </div>
+                {pwError && <p className="text-sm text-destructive">{pwError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={pwLoading}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    <Check size={14} />
+                    {pwLoading ? "更改中..." : "確認更改"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setChangePwMember(null); setNewPw(""); setPwError(""); }}
+                    className="px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted"
+                  >
+                    取消
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
