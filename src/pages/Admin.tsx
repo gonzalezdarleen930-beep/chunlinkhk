@@ -199,6 +199,28 @@ export default function Admin() {
     navigate("/");
   }
 
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!changePwMember) return;
+    setPwError("");
+    setPwSuccess("");
+    setPwLoading(true);
+    const { data, error } = await supabase.functions.invoke("change-member-password", {
+      body: { user_id: changePwMember.id, new_password: newPw },
+    });
+    setPwLoading(false);
+    if (error || data?.error) {
+      setPwError(data?.error || "修改密碼失敗，請重試。");
+    } else {
+      setPwSuccess("✅ 密碼已成功更改！");
+      setNewPw("");
+      setTimeout(() => {
+        setChangePwMember(null);
+        setPwSuccess("");
+      }, 1500);
+    }
+  }
+
   const getMemberEmail = (userId: string) =>
     members.find((m) => m.id === userId)?.email ?? userId.slice(0, 12) + "...";
 
