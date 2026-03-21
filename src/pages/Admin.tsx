@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound } from "lucide-react";
 
 interface MemberUser {
   id: string;
