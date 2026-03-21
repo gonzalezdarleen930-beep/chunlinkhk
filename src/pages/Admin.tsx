@@ -395,6 +395,13 @@ export default function Admin() {
                         新增貸款
                       </button>
                       <button
+                        onClick={() => { setChangePwMember(member); setNewPw(""); setPwError(""); setPwSuccess(""); }}
+                        className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground"
+                        title="修改密碼"
+                      >
+                        <KeyRound size={13} />
+                      </button>
+                      <button
                         onClick={() => handleDeleteMember(member.id, member.email)}
                         className="p-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"
                         title="刪除會員"
@@ -402,6 +409,7 @@ export default function Admin() {
                         <Trash2 size={13} />
                       </button>
                     </div>
+
                   </div>
                 );
               })
