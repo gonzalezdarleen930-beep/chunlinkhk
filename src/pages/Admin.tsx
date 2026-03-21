@@ -65,6 +65,13 @@ export default function Admin() {
   const [loanError, setLoanError] = useState("");
   const [loanLoading, setLoanLoading] = useState(false);
 
+  // Change password
+  const [changePwMember, setChangePwMember] = useState<MemberUser | null>(null);
+  const [newPw, setNewPw] = useState("");
+  const [pwError, setPwError] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwSuccess, setPwSuccess] = useState("");
+
   // Selected member for filtering
   const [selectedMemberId, setSelectedMemberId] = useState<string>("all");
 
