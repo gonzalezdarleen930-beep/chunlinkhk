@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Online() {
   const [form, setForm] = useState({
@@ -25,6 +26,8 @@ export default function Online() {
     agreed: false,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target;
@@ -34,9 +37,42 @@ export default function Online() {
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.agreed) return;
+    setSubmitting(true);
+    setSubmitError("");
+
+    const { error } = await supabase.from("loan_applications").insert([{
+      name_chinese: form.nameChinese,
+      name_english: form.nameEnglish,
+      hkid: form.hkid,
+      dob: form.dob,
+      gender: form.gender,
+      marital_status: form.maritalStatus,
+      children: form.children,
+      phone: form.phone,
+      email: form.email,
+      address: form.address,
+      property_type: form.propertyType,
+      cohabitants: form.cohabitants,
+      occupation: form.occupation,
+      monthly_salary: Number(form.monthlySalary) || 0,
+      payment_method: form.paymentMethod,
+      loan_amount: Number(form.loanAmount) || 0,
+      applied_loan_amount: Number(form.loanAmount) || 0,
+      previous_applications: form.previousApplications,
+      referral_source: form.referralSource,
+      status: "審批中",
+    }]);
+
+    setSubmitting(false);
+
+    if (error) {
+      setSubmitError("提交失敗，請稍後重試。");
+      return;
+    }
+
     setSubmitted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -46,12 +82,16 @@ export default function Online() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center py-20">
-          <div className="text-center max-w-md mx-auto px-4">
-            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">✅</span>
+          <div className="text-center max-w-lg mx-auto px-4">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl">✅</span>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">申請已提交！</h2>
-            <p className="text-muted-foreground mb-6">感謝您的申請，我們的專員將盡快與您聯絡。</p>
+            <h2 className="text-2xl font-bold text-foreground mb-4">資料提交成功</h2>
+            <div className="bg-card border border-border rounded-xl p-6 text-left space-y-3 mb-6">
+              <p className="text-foreground leading-relaxed">
+                登入方式會以電郵形式發送給你，請留意你填寫的電郵以及電話，客戶服務主任會盡快聯絡你。
+              </p>
+            </div>
             <a href="/" className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity">
               返回首頁
             </a>
@@ -76,6 +116,7 @@ export default function Online() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Personal Info */}
             <div className="bg-card rounded-xl border border-border p-6">
+              <h2 className="text-base font-bold text-primary mb-5">個人資料</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className={labelCls}>中文姓名 {requiredSpan}</label>
@@ -231,16 +272,20 @@ export default function Online() {
                 className="mt-0.5 w-4 h-4 accent-primary"
               />
               <label htmlFor="agreed" className="text-sm text-foreground cursor-pointer">
-                此項必須填寫哦 <span className="text-destructive">*</span>
+                本人已閱讀並同意上述聲明 <span className="text-destructive">*</span>
               </label>
             </div>
 
+            {submitError && (
+              <p className="text-sm text-destructive">{submitError}</p>
+            )}
+
             <button
               type="submit"
-              disabled={!form.agreed}
+              disabled={!form.agreed || submitting}
               className="w-full md:w-auto px-10 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              提交
+              {submitting ? "提交中..." : "提交"}
             </button>
           </form>
         </div>

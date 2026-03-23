@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import logoImg from "@/assets/logo.jpg";
 
 const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
@@ -54,15 +55,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">富</span>
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-sm font-bold text-foreground leading-tight">富毅信貸有限公司</div>
-                <div className="text-xs text-muted-foreground leading-tight">GRIT CREDIT LIMITED</div>
-              </div>
-            </div>
+            <img src={logoImg} alt="富毅信貸有限公司" className="h-10 w-auto object-contain" />
           </Link>
 
           {/* Desktop Nav */}
@@ -108,17 +101,15 @@ export default function Navbar() {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-md border border-primary text-primary text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <User size={14} />
-                會員登入
+                登入
               </Link>
             )}
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/online"
               className="inline-flex items-center px-5 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
             >
               立即申請
-            </a>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -170,17 +161,16 @@ export default function Navbar() {
                 className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-md border border-primary text-primary hover:bg-primary/10"
               >
                 <User size={14} />
-                會員登入
+                登入
               </Link>
             )}
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/online"
+              onClick={() => setOpen(false)}
               className="block mt-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium text-center"
             >
               立即申請
-            </a>
+            </Link>
           </div>
         </div>
       )}
