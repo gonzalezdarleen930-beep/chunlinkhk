@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can insert application" ON public.loan_applications; CREATE POLICY "Anyone can insert application" ON public.loan_applications FOR INSERT TO anon, authenticated WITH CHECK (true);
