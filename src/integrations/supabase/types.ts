@@ -71,6 +71,87 @@ export type Database = {
         }
         Relationships: []
       }
+      loan_applications: {
+        Row: {
+          address: string
+          applied_loan_amount: number
+          children: string
+          cohabitants: string
+          created_at: string
+          dob: string
+          email: string
+          gender: string
+          hkid: string
+          id: string
+          loan_amount: number
+          marital_status: string
+          monthly_salary: number
+          name_chinese: string
+          name_english: string
+          occupation: string
+          payment_method: string
+          phone: string
+          previous_applications: string
+          property_type: string
+          referral_source: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string
+          applied_loan_amount?: number
+          children?: string
+          cohabitants?: string
+          created_at?: string
+          dob?: string
+          email?: string
+          gender?: string
+          hkid?: string
+          id?: string
+          loan_amount?: number
+          marital_status?: string
+          monthly_salary?: number
+          name_chinese?: string
+          name_english?: string
+          occupation?: string
+          payment_method?: string
+          phone?: string
+          previous_applications?: string
+          property_type?: string
+          referral_source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string
+          applied_loan_amount?: number
+          children?: string
+          cohabitants?: string
+          created_at?: string
+          dob?: string
+          email?: string
+          gender?: string
+          hkid?: string
+          id?: string
+          loan_amount?: number
+          marital_status?: string
+          monthly_salary?: number
+          name_chinese?: string
+          name_english?: string
+          occupation?: string
+          payment_method?: string
+          phone?: string
+          previous_applications?: string
+          property_type?: string
+          referral_source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
