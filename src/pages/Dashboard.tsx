@@ -111,13 +111,7 @@ export default function Dashboard() {
       <header className="bg-background border-b border-border shadow-sm sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <span className="text-primary-foreground font-bold text-sm">富</span>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-foreground leading-tight">富毅信貸有限公司</div>
-              <div className="text-xs text-muted-foreground leading-tight">GRIT CREDIT LIMITED</div>
-            </div>
+            <img src={logoImg} alt="富毅信貸有限公司" className="h-10 w-auto object-contain" />
           </div>
           <div className="flex items-center gap-3">
             {isAdmin && (
