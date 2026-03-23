@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoImg from "@/assets/logo.jpg";
 
 const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
@@ -9,14 +10,8 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row md:items-start gap-8">
           {/* Logo & description */}
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">富</span>
-              </div>
-              <div>
-                <div className="text-sm font-bold text-background leading-tight">富毅信貸有限公司</div>
-                <div className="text-xs opacity-60 leading-tight">GRIT CREDIT LIMITED</div>
-              </div>
+          <div className="flex items-center gap-2 mb-4">
+              <img src={logoImg} alt="富毅信貸有限公司" className="h-10 w-auto object-contain" />
             </div>
             <p className="text-sm opacity-70 mb-3">放債人牌照號碼: 1841/2025</p>
             <a

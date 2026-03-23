@@ -69,7 +69,8 @@ export default function Online() {
     setSubmitting(false);
 
     if (error) {
-      setSubmitError("提交失敗，請稍後重試。");
+      console.error("Submission error:", error);
+      setSubmitError("提交失敗：" + (error.message || "請稍後重試。"));
       return;
     }
 
