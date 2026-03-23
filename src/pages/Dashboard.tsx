@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut, User, Clock, CheckCircle, XCircle } from "lucide-react";
+import logoImg from "@/assets/logo.jpg";
 
 interface LoanAccount {
   id: string;

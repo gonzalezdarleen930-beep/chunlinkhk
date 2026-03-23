@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoImg from "@/assets/logo.jpg";
 
 const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
