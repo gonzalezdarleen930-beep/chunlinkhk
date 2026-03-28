@@ -574,6 +574,8 @@ export default function Admin() {
             { key: "applications", label: "貸款申請", icon: <FileText size={14} /> },
             { key: "members", label: "會員管理", icon: <Users size={14} /> },
             { key: "loans", label: "貸款帳戶", icon: <CreditCard size={14} /> },
+            { key: "products", label: "貸款項目", icon: <Package size={14} /> },
+            { key: "advantages", label: "服務優勢", icon: <Star size={14} /> },
             { key: "faqs", label: "問題中心", icon: <HelpCircle size={14} /> },
           ].map((tab) => (
             <button
