@@ -121,7 +121,7 @@ export default function Admin() {
   const [loans, setLoans] = useState<LoanAccount[]>([]);
   const [applications, setApplications] = useState<LoanApplication[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs">("applications");
+  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs" | "products" | "advantages">("applications");
 
   // FAQ management
   const [faqList, setFaqList] = useState<FaqItem[]>([]);
@@ -130,6 +130,25 @@ export default function Admin() {
   const [faqQuestion, setFaqQuestion] = useState("");
   const [faqAnswer, setFaqAnswer] = useState("");
   const [faqLoading, setFaqLoading] = useState(false);
+
+  // Loan products management
+  const [productList, setProductList] = useState<LoanProductItem[]>([]);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<LoanProductItem | null>(null);
+  const [productSlug, setProductSlug] = useState("");
+  const [productTitle, setProductTitle] = useState("");
+  const [productDesc, setProductDesc] = useState("");
+  const [productContent, setProductContent] = useState("");
+  const [productLoading, setProductLoading] = useState(false);
+
+  // Advantages management
+  const [advantageList, setAdvantageList] = useState<AdvantageItem[]>([]);
+  const [showAdvantageForm, setShowAdvantageForm] = useState(false);
+  const [editingAdvantage, setEditingAdvantage] = useState<AdvantageItem | null>(null);
+  const [advIcon, setAdvIcon] = useState("⚡");
+  const [advTitle, setAdvTitle] = useState("");
+  const [advDesc, setAdvDesc] = useState("");
+  const [advLoading, setAdvLoading] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);
