@@ -916,6 +916,136 @@ export default function Admin() {
           </section>
         )}
 
+        {/* ===== PRODUCTS TAB ===== */}
+        {activeTab === "products" && (
+          <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Package size={16} className="text-primary" />
+                <h2 className="font-semibold text-foreground">貸款項目管理</h2>
+              </div>
+              <button onClick={() => { showProductForm ? setShowProductForm(false) : openNewProduct(); }} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                {showProductForm ? <X size={14} /> : <Plus size={14} />}
+                {showProductForm ? "取消" : "新增產品"}
+              </button>
+            </div>
+            {showProductForm && (
+              <form onSubmit={handleSaveProduct} className="px-6 py-5 border-b border-border bg-muted/30 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">{editingProduct ? "編輯產品" : "新增產品"}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>網址代碼 (slug)</label>
+                    <input type="text" value={productSlug} onChange={(e) => setProductSlug(e.target.value)} required className={inputClass} placeholder="例：personal-loan" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>標題</label>
+                    <input type="text" value={productTitle} onChange={(e) => setProductTitle(e.target.value)} required className={inputClass} placeholder="例：私人貸款" />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>簡述</label>
+                  <input type="text" value={productDesc} onChange={(e) => setProductDesc(e.target.value)} required className={inputClass} placeholder="產品簡述" />
+                </div>
+                <div>
+                  <label className={labelClass}>內容 (支持 Markdown 格式)</label>
+                  <textarea value={productContent} onChange={(e) => setProductContent(e.target.value)} required rows={10} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y font-mono" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={productLoading} className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                    <Check size={14} />{productLoading ? "儲存中..." : "儲存"}
+                  </button>
+                  <button type="button" onClick={() => { setShowProductForm(false); setEditingProduct(null); }} className="px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted">取消</button>
+                </div>
+              </form>
+            )}
+            <div className="divide-y divide-border">
+              {productList.length === 0 ? (
+                <div className="px-6 py-10 text-center text-muted-foreground text-sm">暫時未有貸款產品</div>
+              ) : (
+                productList.map((p, idx) => (
+                  <div key={p.id} className="px-6 py-4 flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground text-sm">{p.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">/loan/{p.slug}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.description}</p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => handleMoveProduct(p, "up")} disabled={idx === 0} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowUp size={12} /></button>
+                      <button onClick={() => handleMoveProduct(p, "down")} disabled={idx === productList.length - 1} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowDown size={12} /></button>
+                      <button onClick={() => openEditProduct(p)} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground"><Edit2 size={12} /></button>
+                      <button onClick={() => handleDeleteProduct(p.id)} className="p-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"><Trash2 size={12} /></button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ===== ADVANTAGES TAB ===== */}
+        {activeTab === "advantages" && (
+          <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Star size={16} className="text-primary" />
+                <h2 className="font-semibold text-foreground">服務優勢管理</h2>
+              </div>
+              <button onClick={() => { showAdvantageForm ? setShowAdvantageForm(false) : openNewAdvantage(); }} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                {showAdvantageForm ? <X size={14} /> : <Plus size={14} />}
+                {showAdvantageForm ? "取消" : "新增優勢"}
+              </button>
+            </div>
+            {showAdvantageForm && (
+              <form onSubmit={handleSaveAdvantage} className="px-6 py-5 border-b border-border bg-muted/30 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">{editingAdvantage ? "編輯優勢" : "新增優勢"}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className={labelClass}>圖標 (Emoji)</label>
+                    <input type="text" value={advIcon} onChange={(e) => setAdvIcon(e.target.value)} required className={inputClass} placeholder="⚡" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>標題</label>
+                    <input type="text" value={advTitle} onChange={(e) => setAdvTitle(e.target.value)} required className={inputClass} />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>描述</label>
+                  <textarea value={advDesc} onChange={(e) => setAdvDesc(e.target.value)} required rows={3} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={advLoading} className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                    <Check size={14} />{advLoading ? "儲存中..." : "儲存"}
+                  </button>
+                  <button type="button" onClick={() => { setShowAdvantageForm(false); setEditingAdvantage(null); }} className="px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted">取消</button>
+                </div>
+              </form>
+            )}
+            <div className="divide-y divide-border">
+              {advantageList.length === 0 ? (
+                <div className="px-6 py-10 text-center text-muted-foreground text-sm">暫時未有優勢項目</div>
+              ) : (
+                advantageList.map((a, idx) => (
+                  <div key={a.id} className="px-6 py-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="text-2xl">{a.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground text-sm">{a.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{a.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => handleMoveAdvantage(a, "up")} disabled={idx === 0} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowUp size={12} /></button>
+                      <button onClick={() => handleMoveAdvantage(a, "down")} disabled={idx === advantageList.length - 1} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowDown size={12} /></button>
+                      <button onClick={() => openEditAdvantage(a)} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground"><Edit2 size={12} /></button>
+                      <button onClick={() => handleDeleteAdvantage(a.id)} className="p-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"><Trash2 size={12} /></button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
         {/* ===== FAQS TAB ===== */}
         {activeTab === "faqs" && (
           <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
