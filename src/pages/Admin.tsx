@@ -52,6 +52,14 @@ interface LoanApplication {
   created_at: string;
 }
 
+interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  sort_order: number;
+}
+
+
 const EMPTY_LOAN: Omit<LoanAccount, "id"> = {
   user_id: "",
   loan_number: "",
