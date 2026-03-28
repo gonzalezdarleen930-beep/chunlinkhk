@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound, FileText, Clock, CheckCircle, XCircle, HelpCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound, FileText, Clock, CheckCircle, XCircle, HelpCircle, ArrowUp, ArrowDown, Package, Star } from "lucide-react";
 import logoImg from "@/assets/logo.jpg";
 
 interface MemberUser {
@@ -59,6 +59,23 @@ interface FaqItem {
   sort_order: number;
 }
 
+interface LoanProductItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  sort_order: number;
+}
+
+interface AdvantageItem {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  sort_order: number;
+}
+
 
 const EMPTY_LOAN: Omit<LoanAccount, "id"> = {
   user_id: "",
@@ -104,7 +121,7 @@ export default function Admin() {
   const [loans, setLoans] = useState<LoanAccount[]>([]);
   const [applications, setApplications] = useState<LoanApplication[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs">("applications");
+  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs" | "products" | "advantages">("applications");
 
   // FAQ management
   const [faqList, setFaqList] = useState<FaqItem[]>([]);
@@ -113,6 +130,25 @@ export default function Admin() {
   const [faqQuestion, setFaqQuestion] = useState("");
   const [faqAnswer, setFaqAnswer] = useState("");
   const [faqLoading, setFaqLoading] = useState(false);
+
+  // Loan products management
+  const [productList, setProductList] = useState<LoanProductItem[]>([]);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<LoanProductItem | null>(null);
+  const [productSlug, setProductSlug] = useState("");
+  const [productTitle, setProductTitle] = useState("");
+  const [productDesc, setProductDesc] = useState("");
+  const [productContent, setProductContent] = useState("");
+  const [productLoading, setProductLoading] = useState(false);
+
+  // Advantages management
+  const [advantageList, setAdvantageList] = useState<AdvantageItem[]>([]);
+  const [showAdvantageForm, setShowAdvantageForm] = useState(false);
+  const [editingAdvantage, setEditingAdvantage] = useState<AdvantageItem | null>(null);
+  const [advIcon, setAdvIcon] = useState("⚡");
+  const [advTitle, setAdvTitle] = useState("");
+  const [advDesc, setAdvDesc] = useState("");
+  const [advLoading, setAdvLoading] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);
@@ -185,9 +221,25 @@ export default function Admin() {
     setFaqList((data ?? []) as FaqItem[]);
   }
 
+  async function fetchProducts() {
+    const { data } = await supabase
+      .from("loan_products")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setProductList((data ?? []) as LoanProductItem[]);
+  }
+
+  async function fetchAdvantages() {
+    const { data } = await supabase
+      .from("advantages")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setAdvantageList((data ?? []) as AdvantageItem[]);
+  }
+
   async function fetchData() {
     setFetching(true);
-    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications(), fetchFaqs()]);
+    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages()]);
     setFetching(false);
   }
 
@@ -237,6 +289,72 @@ export default function Admin() {
       supabase.from("faqs").update({ sort_order: faq.sort_order }).eq("id", other.id),
     ]);
     await fetchFaqs();
+  }
+
+  // Product handlers
+  function openNewProduct() {
+    setEditingProduct(null); setProductSlug(""); setProductTitle(""); setProductDesc(""); setProductContent(""); setShowProductForm(true);
+  }
+  function openEditProduct(p: LoanProductItem) {
+    setEditingProduct(p); setProductSlug(p.slug); setProductTitle(p.title); setProductDesc(p.description); setProductContent(p.content); setShowProductForm(true);
+  }
+  async function handleSaveProduct(e: React.FormEvent) {
+    e.preventDefault(); setProductLoading(true);
+    if (editingProduct) {
+      await supabase.from("loan_products").update({ slug: productSlug, title: productTitle, description: productDesc, content: productContent }).eq("id", editingProduct.id);
+    } else {
+      const maxOrder = productList.length > 0 ? Math.max(...productList.map(p => p.sort_order)) : 0;
+      await supabase.from("loan_products").insert([{ slug: productSlug, title: productTitle, description: productDesc, content: productContent, sort_order: maxOrder + 1 }]);
+    }
+    setProductLoading(false); setShowProductForm(false); setEditingProduct(null); await fetchProducts();
+  }
+  async function handleDeleteProduct(id: string) {
+    if (!confirm("確定刪除此貸款產品？")) return;
+    await supabase.from("loan_products").delete().eq("id", id); await fetchProducts();
+  }
+  async function handleMoveProduct(item: LoanProductItem, direction: "up" | "down") {
+    const idx = productList.findIndex(p => p.id === item.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= productList.length) return;
+    const other = productList[swapIdx];
+    await Promise.all([
+      supabase.from("loan_products").update({ sort_order: other.sort_order }).eq("id", item.id),
+      supabase.from("loan_products").update({ sort_order: item.sort_order }).eq("id", other.id),
+    ]);
+    await fetchProducts();
+  }
+
+  // Advantage handlers
+  function openNewAdvantage() {
+    setEditingAdvantage(null); setAdvIcon("⚡"); setAdvTitle(""); setAdvDesc(""); setShowAdvantageForm(true);
+  }
+  function openEditAdvantage(a: AdvantageItem) {
+    setEditingAdvantage(a); setAdvIcon(a.icon); setAdvTitle(a.title); setAdvDesc(a.description); setShowAdvantageForm(true);
+  }
+  async function handleSaveAdvantage(e: React.FormEvent) {
+    e.preventDefault(); setAdvLoading(true);
+    if (editingAdvantage) {
+      await supabase.from("advantages").update({ icon: advIcon, title: advTitle, description: advDesc }).eq("id", editingAdvantage.id);
+    } else {
+      const maxOrder = advantageList.length > 0 ? Math.max(...advantageList.map(a => a.sort_order)) : 0;
+      await supabase.from("advantages").insert([{ icon: advIcon, title: advTitle, description: advDesc, sort_order: maxOrder + 1 }]);
+    }
+    setAdvLoading(false); setShowAdvantageForm(false); setEditingAdvantage(null); await fetchAdvantages();
+  }
+  async function handleDeleteAdvantage(id: string) {
+    if (!confirm("確定刪除此優勢項目？")) return;
+    await supabase.from("advantages").delete().eq("id", id); await fetchAdvantages();
+  }
+  async function handleMoveAdvantage(item: AdvantageItem, direction: "up" | "down") {
+    const idx = advantageList.findIndex(a => a.id === item.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= advantageList.length) return;
+    const other = advantageList[swapIdx];
+    await Promise.all([
+      supabase.from("advantages").update({ sort_order: other.sort_order }).eq("id", item.id),
+      supabase.from("advantages").update({ sort_order: item.sort_order }).eq("id", other.id),
+    ]);
+    await fetchAdvantages();
   }
 
   async function handleCreateMember(e: React.FormEvent) {
@@ -456,6 +574,8 @@ export default function Admin() {
             { key: "applications", label: "貸款申請", icon: <FileText size={14} /> },
             { key: "members", label: "會員管理", icon: <Users size={14} /> },
             { key: "loans", label: "貸款帳戶", icon: <CreditCard size={14} /> },
+            { key: "products", label: "貸款項目", icon: <Package size={14} /> },
+            { key: "advantages", label: "服務優勢", icon: <Star size={14} /> },
             { key: "faqs", label: "問題中心", icon: <HelpCircle size={14} /> },
           ].map((tab) => (
             <button
@@ -788,6 +908,136 @@ export default function Admin() {
                           刪除
                         </button>
                       </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ===== PRODUCTS TAB ===== */}
+        {activeTab === "products" && (
+          <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Package size={16} className="text-primary" />
+                <h2 className="font-semibold text-foreground">貸款項目管理</h2>
+              </div>
+              <button onClick={() => { showProductForm ? setShowProductForm(false) : openNewProduct(); }} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                {showProductForm ? <X size={14} /> : <Plus size={14} />}
+                {showProductForm ? "取消" : "新增產品"}
+              </button>
+            </div>
+            {showProductForm && (
+              <form onSubmit={handleSaveProduct} className="px-6 py-5 border-b border-border bg-muted/30 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">{editingProduct ? "編輯產品" : "新增產品"}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>網址代碼 (slug)</label>
+                    <input type="text" value={productSlug} onChange={(e) => setProductSlug(e.target.value)} required className={inputClass} placeholder="例：personal-loan" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>標題</label>
+                    <input type="text" value={productTitle} onChange={(e) => setProductTitle(e.target.value)} required className={inputClass} placeholder="例：私人貸款" />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>簡述</label>
+                  <input type="text" value={productDesc} onChange={(e) => setProductDesc(e.target.value)} required className={inputClass} placeholder="產品簡述" />
+                </div>
+                <div>
+                  <label className={labelClass}>內容 (支持 Markdown 格式)</label>
+                  <textarea value={productContent} onChange={(e) => setProductContent(e.target.value)} required rows={10} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y font-mono" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={productLoading} className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                    <Check size={14} />{productLoading ? "儲存中..." : "儲存"}
+                  </button>
+                  <button type="button" onClick={() => { setShowProductForm(false); setEditingProduct(null); }} className="px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted">取消</button>
+                </div>
+              </form>
+            )}
+            <div className="divide-y divide-border">
+              {productList.length === 0 ? (
+                <div className="px-6 py-10 text-center text-muted-foreground text-sm">暫時未有貸款產品</div>
+              ) : (
+                productList.map((p, idx) => (
+                  <div key={p.id} className="px-6 py-4 flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground text-sm">{p.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">/loan/{p.slug}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.description}</p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => handleMoveProduct(p, "up")} disabled={idx === 0} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowUp size={12} /></button>
+                      <button onClick={() => handleMoveProduct(p, "down")} disabled={idx === productList.length - 1} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowDown size={12} /></button>
+                      <button onClick={() => openEditProduct(p)} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground"><Edit2 size={12} /></button>
+                      <button onClick={() => handleDeleteProduct(p.id)} className="p-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"><Trash2 size={12} /></button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ===== ADVANTAGES TAB ===== */}
+        {activeTab === "advantages" && (
+          <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Star size={16} className="text-primary" />
+                <h2 className="font-semibold text-foreground">服務優勢管理</h2>
+              </div>
+              <button onClick={() => { showAdvantageForm ? setShowAdvantageForm(false) : openNewAdvantage(); }} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                {showAdvantageForm ? <X size={14} /> : <Plus size={14} />}
+                {showAdvantageForm ? "取消" : "新增優勢"}
+              </button>
+            </div>
+            {showAdvantageForm && (
+              <form onSubmit={handleSaveAdvantage} className="px-6 py-5 border-b border-border bg-muted/30 space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">{editingAdvantage ? "編輯優勢" : "新增優勢"}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className={labelClass}>圖標 (Emoji)</label>
+                    <input type="text" value={advIcon} onChange={(e) => setAdvIcon(e.target.value)} required className={inputClass} placeholder="⚡" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>標題</label>
+                    <input type="text" value={advTitle} onChange={(e) => setAdvTitle(e.target.value)} required className={inputClass} />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>描述</label>
+                  <textarea value={advDesc} onChange={(e) => setAdvDesc(e.target.value)} required rows={3} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" disabled={advLoading} className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                    <Check size={14} />{advLoading ? "儲存中..." : "儲存"}
+                  </button>
+                  <button type="button" onClick={() => { setShowAdvantageForm(false); setEditingAdvantage(null); }} className="px-4 py-2 rounded-md border border-border text-sm text-foreground hover:bg-muted">取消</button>
+                </div>
+              </form>
+            )}
+            <div className="divide-y divide-border">
+              {advantageList.length === 0 ? (
+                <div className="px-6 py-10 text-center text-muted-foreground text-sm">暫時未有優勢項目</div>
+              ) : (
+                advantageList.map((a, idx) => (
+                  <div key={a.id} className="px-6 py-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="text-2xl">{a.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground text-sm">{a.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{a.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => handleMoveAdvantage(a, "up")} disabled={idx === 0} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowUp size={12} /></button>
+                      <button onClick={() => handleMoveAdvantage(a, "down")} disabled={idx === advantageList.length - 1} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground disabled:opacity-30"><ArrowDown size={12} /></button>
+                      <button onClick={() => openEditAdvantage(a)} className="p-1.5 rounded-md border border-border hover:bg-muted transition-colors text-muted-foreground"><Edit2 size={12} /></button>
+                      <button onClick={() => handleDeleteAdvantage(a.id)} className="p-1.5 rounded-md border border-destructive/30 hover:bg-destructive/10 transition-colors text-destructive"><Trash2 size={12} /></button>
                     </div>
                   </div>
                 ))
