@@ -291,6 +291,72 @@ export default function Admin() {
     await fetchFaqs();
   }
 
+  // Product handlers
+  function openNewProduct() {
+    setEditingProduct(null); setProductSlug(""); setProductTitle(""); setProductDesc(""); setProductContent(""); setShowProductForm(true);
+  }
+  function openEditProduct(p: LoanProductItem) {
+    setEditingProduct(p); setProductSlug(p.slug); setProductTitle(p.title); setProductDesc(p.description); setProductContent(p.content); setShowProductForm(true);
+  }
+  async function handleSaveProduct(e: React.FormEvent) {
+    e.preventDefault(); setProductLoading(true);
+    if (editingProduct) {
+      await supabase.from("loan_products").update({ slug: productSlug, title: productTitle, description: productDesc, content: productContent }).eq("id", editingProduct.id);
+    } else {
+      const maxOrder = productList.length > 0 ? Math.max(...productList.map(p => p.sort_order)) : 0;
+      await supabase.from("loan_products").insert([{ slug: productSlug, title: productTitle, description: productDesc, content: productContent, sort_order: maxOrder + 1 }]);
+    }
+    setProductLoading(false); setShowProductForm(false); setEditingProduct(null); await fetchProducts();
+  }
+  async function handleDeleteProduct(id: string) {
+    if (!confirm("確定刪除此貸款產品？")) return;
+    await supabase.from("loan_products").delete().eq("id", id); await fetchProducts();
+  }
+  async function handleMoveProduct(item: LoanProductItem, direction: "up" | "down") {
+    const idx = productList.findIndex(p => p.id === item.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= productList.length) return;
+    const other = productList[swapIdx];
+    await Promise.all([
+      supabase.from("loan_products").update({ sort_order: other.sort_order }).eq("id", item.id),
+      supabase.from("loan_products").update({ sort_order: item.sort_order }).eq("id", other.id),
+    ]);
+    await fetchProducts();
+  }
+
+  // Advantage handlers
+  function openNewAdvantage() {
+    setEditingAdvantage(null); setAdvIcon("⚡"); setAdvTitle(""); setAdvDesc(""); setShowAdvantageForm(true);
+  }
+  function openEditAdvantage(a: AdvantageItem) {
+    setEditingAdvantage(a); setAdvIcon(a.icon); setAdvTitle(a.title); setAdvDesc(a.description); setShowAdvantageForm(true);
+  }
+  async function handleSaveAdvantage(e: React.FormEvent) {
+    e.preventDefault(); setAdvLoading(true);
+    if (editingAdvantage) {
+      await supabase.from("advantages").update({ icon: advIcon, title: advTitle, description: advDesc }).eq("id", editingAdvantage.id);
+    } else {
+      const maxOrder = advantageList.length > 0 ? Math.max(...advantageList.map(a => a.sort_order)) : 0;
+      await supabase.from("advantages").insert([{ icon: advIcon, title: advTitle, description: advDesc, sort_order: maxOrder + 1 }]);
+    }
+    setAdvLoading(false); setShowAdvantageForm(false); setEditingAdvantage(null); await fetchAdvantages();
+  }
+  async function handleDeleteAdvantage(id: string) {
+    if (!confirm("確定刪除此優勢項目？")) return;
+    await supabase.from("advantages").delete().eq("id", id); await fetchAdvantages();
+  }
+  async function handleMoveAdvantage(item: AdvantageItem, direction: "up" | "down") {
+    const idx = advantageList.findIndex(a => a.id === item.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= advantageList.length) return;
+    const other = advantageList[swapIdx];
+    await Promise.all([
+      supabase.from("advantages").update({ sort_order: other.sort_order }).eq("id", item.id),
+      supabase.from("advantages").update({ sort_order: item.sort_order }).eq("id", other.id),
+    ]);
+    await fetchAdvantages();
+  }
+
   async function handleCreateMember(e: React.FormEvent) {
     e.preventDefault();
     setMemberError("");
