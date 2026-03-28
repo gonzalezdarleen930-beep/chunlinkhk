@@ -104,7 +104,15 @@ export default function Admin() {
   const [loans, setLoans] = useState<LoanAccount[]>([]);
   const [applications, setApplications] = useState<LoanApplication[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications">("applications");
+  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs">("applications");
+
+  // FAQ management
+  const [faqList, setFaqList] = useState<FaqItem[]>([]);
+  const [showFaqForm, setShowFaqForm] = useState(false);
+  const [editingFaq, setEditingFaq] = useState<FaqItem | null>(null);
+  const [faqQuestion, setFaqQuestion] = useState("");
+  const [faqAnswer, setFaqAnswer] = useState("");
+  const [faqLoading, setFaqLoading] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);
