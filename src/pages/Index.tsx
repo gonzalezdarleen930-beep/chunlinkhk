@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
+import ProcessSection from "@/components/ProcessSection";
 import AboutSection from "@/components/AboutSection";
 import AdvantagesSection from "@/components/AdvantagesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
@@ -13,6 +14,7 @@ export default function Index() {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
+        <ProcessSection />
         <AboutSection />
         <AdvantagesSection />
         <TestimonialsSection />
