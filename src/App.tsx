@@ -12,6 +12,7 @@ import Online from "./pages/Online";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import LoanProduct from "./pages/LoanProduct";
 import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
