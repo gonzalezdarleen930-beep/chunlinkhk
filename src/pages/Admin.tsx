@@ -221,9 +221,25 @@ export default function Admin() {
     setFaqList((data ?? []) as FaqItem[]);
   }
 
+  async function fetchProducts() {
+    const { data } = await supabase
+      .from("loan_products")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setProductList((data ?? []) as LoanProductItem[]);
+  }
+
+  async function fetchAdvantages() {
+    const { data } = await supabase
+      .from("advantages")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setAdvantageList((data ?? []) as AdvantageItem[]);
+  }
+
   async function fetchData() {
     setFetching(true);
-    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications(), fetchFaqs()]);
+    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages()]);
     setFetching(false);
   }
 
