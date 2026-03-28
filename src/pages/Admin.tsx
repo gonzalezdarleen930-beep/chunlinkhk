@@ -59,6 +59,23 @@ interface FaqItem {
   sort_order: number;
 }
 
+interface LoanProductItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  sort_order: number;
+}
+
+interface AdvantageItem {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  sort_order: number;
+}
+
 
 const EMPTY_LOAN: Omit<LoanAccount, "id"> = {
   user_id: "",
