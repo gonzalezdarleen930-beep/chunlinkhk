@@ -62,14 +62,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch each member's email from auth.users using admin API
-    const members = [];
-    for (const { user_id } of memberRoles ?? []) {
+    // Fetch all members in parallel instead of sequentially
+    const memberPromises = (memberRoles ?? []).map(async ({ user_id }) => {
       const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(user_id);
-      if (user) {
-        members.push({ id: user.id, email: user.email });
-      }
-    }
+      return user ? { id: user.id, email: user.email } : null;
+    });
+
+    const results = await Promise.all(memberPromises);
+    const members = results.filter(Boolean);
 
     return new Response(
       JSON.stringify({ members }),

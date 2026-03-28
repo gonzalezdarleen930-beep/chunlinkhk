@@ -239,8 +239,11 @@ export default function Admin() {
 
   async function fetchData() {
     setFetching(true);
-    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages()]);
+    // Load DB data first (fast), then edge function (slower due to cold start)
+    await Promise.all([fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages()]);
     setFetching(false);
+    // Load members in background (edge function can be slow)
+    fetchMembers();
   }
 
   // FAQ handlers
