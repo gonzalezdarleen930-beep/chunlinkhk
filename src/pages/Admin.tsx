@@ -177,10 +177,66 @@ export default function Admin() {
     setApplications((data ?? []) as LoanApplication[]);
   }
 
+  async function fetchFaqs() {
+    const { data } = await supabase
+      .from("faqs")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    setFaqList((data ?? []) as FaqItem[]);
+  }
+
   async function fetchData() {
     setFetching(true);
-    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications()]);
+    await Promise.all([fetchMembers(), fetchLoans(), fetchApplications(), fetchFaqs()]);
     setFetching(false);
+  }
+
+  // FAQ handlers
+  function openNewFaq() {
+    setEditingFaq(null);
+    setFaqQuestion("");
+    setFaqAnswer("");
+    setShowFaqForm(true);
+  }
+
+  function openEditFaq(faq: FaqItem) {
+    setEditingFaq(faq);
+    setFaqQuestion(faq.question);
+    setFaqAnswer(faq.answer);
+    setShowFaqForm(true);
+  }
+
+  async function handleSaveFaq(e: React.FormEvent) {
+    e.preventDefault();
+    setFaqLoading(true);
+    if (editingFaq) {
+      await supabase.from("faqs").update({ question: faqQuestion, answer: faqAnswer }).eq("id", editingFaq.id);
+    } else {
+      const maxOrder = faqList.length > 0 ? Math.max(...faqList.map(f => f.sort_order)) : 0;
+      await supabase.from("faqs").insert([{ question: faqQuestion, answer: faqAnswer, sort_order: maxOrder + 1 }]);
+    }
+    setFaqLoading(false);
+    setShowFaqForm(false);
+    setEditingFaq(null);
+    await fetchFaqs();
+  }
+
+  async function handleDeleteFaq(id: string) {
+    if (!confirm("確定刪除此問題？")) return;
+    await supabase.from("faqs").delete().eq("id", id);
+    await fetchFaqs();
+  }
+
+  async function handleMoveFaq(faq: FaqItem, direction: "up" | "down") {
+    const idx = faqList.findIndex(f => f.id === faq.id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= faqList.length) return;
+    const other = faqList[swapIdx];
+    await Promise.all([
+      supabase.from("faqs").update({ sort_order: other.sort_order }).eq("id", faq.id),
+      supabase.from("faqs").update({ sort_order: faq.sort_order }).eq("id", other.id),
+    ]);
+    await fetchFaqs();
   }
 
   async function handleCreateMember(e: React.FormEvent) {
