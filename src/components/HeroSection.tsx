@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
-const MONTHS = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36];
+const MONTHS = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120];
 
 export default function HeroSection() {
   const [loanAmount, setLoanAmount] = useState(50000);
