@@ -65,6 +65,7 @@ interface LoanProductItem {
   title: string;
   description: string;
   content: string;
+  image_url: string;
   sort_order: number;
 }
 
