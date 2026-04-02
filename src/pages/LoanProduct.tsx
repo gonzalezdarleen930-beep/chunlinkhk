@@ -101,8 +101,16 @@ export default function LoanProduct() {
       <Navbar />
       <main className="flex-1">
         {/* Hero */}
-        <section className="bg-primary/5 py-16">
-          <div className="max-w-4xl mx-auto px-4 text-center">
+        <section className="relative py-20 overflow-hidden">
+          {product.image_url ? (
+            <div className="absolute inset-0">
+              <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+            </div>
+          ) : (
+            <div className="absolute inset-0 bg-primary/5" />
+          )}
+          <div className="relative max-w-4xl mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{product.title}</h1>
             <p className="text-lg text-muted-foreground mb-8">{product.description}</p>
             <div className="flex items-center justify-center gap-4">

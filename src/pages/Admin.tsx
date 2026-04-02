@@ -952,6 +952,10 @@ export default function Admin() {
                   <input type="text" value={productDesc} onChange={(e) => setProductDesc(e.target.value)} required className={inputClass} placeholder="產品簡述" />
                 </div>
                 <div>
+                  <label className={labelClass}>封面圖片 URL</label>
+                  <input type="text" value={productImageUrl} onChange={(e) => setProductImageUrl(e.target.value)} className={inputClass} placeholder="https://example.com/image.jpg" />
+                </div>
+                <div>
                   <label className={labelClass}>內容 (支持 Markdown 格式)</label>
                   <textarea value={productContent} onChange={(e) => setProductContent(e.target.value)} required rows={10} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-y font-mono" />
                 </div>
