@@ -140,6 +140,7 @@ export default function Admin() {
   const [productTitle, setProductTitle] = useState("");
   const [productDesc, setProductDesc] = useState("");
   const [productContent, setProductContent] = useState("");
+  const [productImageUrl, setProductImageUrl] = useState("");
   const [productLoading, setProductLoading] = useState(false);
 
   // Advantages management
