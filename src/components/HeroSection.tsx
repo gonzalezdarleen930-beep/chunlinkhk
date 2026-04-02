@@ -121,7 +121,7 @@ export default function HeroSection() {
               {/* Notes */}
               <div className="text-xs text-muted-foreground space-y-1">
                 <p>· 貸款金額應在$ <strong>10,000</strong>-$ <strong>200,000</strong> 之間。</p>
-                <p>· 客戶可獲享之利率將按其個人信貸狀況而定，實際利率不超過年息 <strong>36.00</strong>%，還款期一般為 <strong>3</strong> 個月至 <strong>36</strong> 個月。</p>
+                <p>· 客戶可獲享之利率將按其個人信貸狀況而定，實際利率不超過年息 <strong>36.00</strong>%，還款期一般為 <strong>12</strong> 個月至 <strong>120</strong> 個月。</p>
                 <p>· 擁有對貸款審批之最終決定權。</p>
               </div>
             </div>
