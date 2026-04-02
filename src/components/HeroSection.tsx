@@ -11,7 +11,7 @@ export default function HeroSection() {
   const [monthly, setMonthly] = useState<number | null>(null);
 
   function calculate() {
-    if (loanAmount < 10000 || loanAmount > 200000 || selectedMonth === 0) {
+    if (loanAmount < 10000 || loanAmount > 200000 || selectedMonth < 12) {
       setMonthly(null);
       return;
     }

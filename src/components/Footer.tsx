@@ -52,7 +52,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm opacity-70">
               <li>(852) 96396851</li>
               <li>contact@grit-credit.com</li>
-              <li className="max-w-[220px]">九龍旺角彌敦道610號荷李活商業中心1609室</li>
+              <li className="max-w-[220px]">香港夏愨道18號海富中心一座1201</li>
             </ul>
           </div>
         </div>

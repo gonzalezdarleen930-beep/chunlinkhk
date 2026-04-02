@@ -22,9 +22,9 @@ export default function AboutSection() {
           <div className="grid grid-cols-2 gap-4">
             {[
               { num: "2016", label: "年創立" },
-              { num: "10分鐘", label: "極速批核" },
+              { num: "12小時", label: "極速批核" },
               { num: "36%", label: "最高年息" },
-              { num: "36期", label: "最長還款期" },
+              { num: "120期", label: "最長還款期" },
             ].map((item) => (
               <div key={item.label} className="bg-muted rounded-xl p-6 text-center border border-border">
                 <div className="text-2xl font-bold text-primary mb-1">{item.num}</div>

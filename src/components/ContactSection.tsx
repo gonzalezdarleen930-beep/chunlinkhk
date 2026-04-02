@@ -103,7 +103,7 @@ export default function ContactSection() {
             <div className="rounded-xl overflow-hidden border border-border h-64">
               <iframe
                 title="富毅信貸有限公司地圖"
-                src="https://maps.google.com/maps?q=九龍旺角彌敦道610號荷李活商業中心&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=香港夏愨道18號海富中心&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 className="w-full h-full"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
