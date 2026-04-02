@@ -12,6 +12,7 @@ interface Product {
   title: string;
   description: string;
   content: string;
+  image_url: string;
 }
 
 export default function LoanProduct() {
