@@ -1,0 +1,1 @@
+ALTER TABLE public.loan_products ADD COLUMN image_url text NOT NULL DEFAULT '';
