@@ -92,8 +92,8 @@ export default function ContactSection() {
                 <div className="flex items-start gap-3">
                   <span className="text-primary mt-0.5">📍</span>
                   <div>
-                    <div>九龍旺角彌敦道610號荷李活商業中心1609室</div>
-                    <div className="text-xs mt-1">Room 1609, 16/F, Hollywood Plaza, 610 Nathan Road, Mong Kok, Kowloon</div>
+                    <div>香港夏愨道18號海富中心一座1201</div>
+                    <div className="text-xs mt-1">Room 1201, Tower 1, Admiralty Centre, 18 Harcourt Road, Hong Kong</div>
                   </div>
                 </div>
               </div>
@@ -103,7 +103,7 @@ export default function ContactSection() {
             <div className="rounded-xl overflow-hidden border border-border h-64">
               <iframe
                 title="富毅信貸有限公司地圖"
-                src="https://maps.google.com/maps?q=九龍旺角彌敦道610號荷李活商業中心&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=香港夏愨道18號海富中心&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 className="w-full h-full"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

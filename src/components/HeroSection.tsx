@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
-const MONTHS = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36];
+const MONTHS = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120];
 
 export default function HeroSection() {
   const [loanAmount, setLoanAmount] = useState(50000);
@@ -11,7 +11,7 @@ export default function HeroSection() {
   const [monthly, setMonthly] = useState<number | null>(null);
 
   function calculate() {
-    if (loanAmount < 10000 || loanAmount > 200000 || selectedMonth === 0) {
+    if (loanAmount < 10000 || loanAmount > 200000 || selectedMonth < 12) {
       setMonthly(null);
       return;
     }
@@ -121,7 +121,7 @@ export default function HeroSection() {
               {/* Notes */}
               <div className="text-xs text-muted-foreground space-y-1">
                 <p>· 貸款金額應在$ <strong>10,000</strong>-$ <strong>200,000</strong> 之間。</p>
-                <p>· 客戶可獲享之利率將按其個人信貸狀況而定，實際利率不超過年息 <strong>36.00</strong>%，還款期一般為 <strong>3</strong> 個月至 <strong>36</strong> 個月。</p>
+                <p>· 客戶可獲享之利率將按其個人信貸狀況而定，實際利率不超過年息 <strong>36.00</strong>%，還款期一般為 <strong>12</strong> 個月至 <strong>120</strong> 個月。</p>
                 <p>· 擁有對貸款審批之最終決定權。</p>
               </div>
             </div>
