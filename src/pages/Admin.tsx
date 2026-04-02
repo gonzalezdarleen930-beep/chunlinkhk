@@ -298,18 +298,18 @@ export default function Admin() {
 
   // Product handlers
   function openNewProduct() {
-    setEditingProduct(null); setProductSlug(""); setProductTitle(""); setProductDesc(""); setProductContent(""); setShowProductForm(true);
+    setEditingProduct(null); setProductSlug(""); setProductTitle(""); setProductDesc(""); setProductContent(""); setProductImageUrl(""); setShowProductForm(true);
   }
   function openEditProduct(p: LoanProductItem) {
-    setEditingProduct(p); setProductSlug(p.slug); setProductTitle(p.title); setProductDesc(p.description); setProductContent(p.content); setShowProductForm(true);
+    setEditingProduct(p); setProductSlug(p.slug); setProductTitle(p.title); setProductDesc(p.description); setProductContent(p.content); setProductImageUrl(p.image_url || ""); setShowProductForm(true);
   }
   async function handleSaveProduct(e: React.FormEvent) {
     e.preventDefault(); setProductLoading(true);
     if (editingProduct) {
-      await supabase.from("loan_products").update({ slug: productSlug, title: productTitle, description: productDesc, content: productContent }).eq("id", editingProduct.id);
+      await supabase.from("loan_products").update({ slug: productSlug, title: productTitle, description: productDesc, content: productContent, image_url: productImageUrl }).eq("id", editingProduct.id);
     } else {
       const maxOrder = productList.length > 0 ? Math.max(...productList.map(p => p.sort_order)) : 0;
-      await supabase.from("loan_products").insert([{ slug: productSlug, title: productTitle, description: productDesc, content: productContent, sort_order: maxOrder + 1 }]);
+      await supabase.from("loan_products").insert([{ slug: productSlug, title: productTitle, description: productDesc, content: productContent, image_url: productImageUrl, sort_order: maxOrder + 1 }]);
     }
     setProductLoading(false); setShowProductForm(false); setEditingProduct(null); await fetchProducts();
   }
