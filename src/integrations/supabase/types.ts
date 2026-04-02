@@ -215,6 +215,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          image_url: string
           slug: string
           sort_order: number
           title: string
@@ -225,6 +226,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_url?: string
           slug: string
           sort_order?: number
           title?: string
@@ -235,6 +237,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_url?: string
           slug?: string
           sort_order?: number
           title?: string

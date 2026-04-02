@@ -65,6 +65,7 @@ interface LoanProductItem {
   title: string;
   description: string;
   content: string;
+  image_url: string;
   sort_order: number;
 }
 
@@ -139,6 +140,7 @@ export default function Admin() {
   const [productTitle, setProductTitle] = useState("");
   const [productDesc, setProductDesc] = useState("");
   const [productContent, setProductContent] = useState("");
+  const [productImageUrl, setProductImageUrl] = useState("");
   const [productLoading, setProductLoading] = useState(false);
 
   // Advantages management
@@ -296,18 +298,18 @@ export default function Admin() {
 
   // Product handlers
   function openNewProduct() {
-    setEditingProduct(null); setProductSlug(""); setProductTitle(""); setProductDesc(""); setProductContent(""); setShowProductForm(true);
+    setEditingProduct(null); setProductSlug(""); setProductTitle(""); setProductDesc(""); setProductContent(""); setProductImageUrl(""); setShowProductForm(true);
   }
   function openEditProduct(p: LoanProductItem) {
-    setEditingProduct(p); setProductSlug(p.slug); setProductTitle(p.title); setProductDesc(p.description); setProductContent(p.content); setShowProductForm(true);
+    setEditingProduct(p); setProductSlug(p.slug); setProductTitle(p.title); setProductDesc(p.description); setProductContent(p.content); setProductImageUrl(p.image_url || ""); setShowProductForm(true);
   }
   async function handleSaveProduct(e: React.FormEvent) {
     e.preventDefault(); setProductLoading(true);
     if (editingProduct) {
-      await supabase.from("loan_products").update({ slug: productSlug, title: productTitle, description: productDesc, content: productContent }).eq("id", editingProduct.id);
+      await supabase.from("loan_products").update({ slug: productSlug, title: productTitle, description: productDesc, content: productContent, image_url: productImageUrl }).eq("id", editingProduct.id);
     } else {
       const maxOrder = productList.length > 0 ? Math.max(...productList.map(p => p.sort_order)) : 0;
-      await supabase.from("loan_products").insert([{ slug: productSlug, title: productTitle, description: productDesc, content: productContent, sort_order: maxOrder + 1 }]);
+      await supabase.from("loan_products").insert([{ slug: productSlug, title: productTitle, description: productDesc, content: productContent, image_url: productImageUrl, sort_order: maxOrder + 1 }]);
     }
     setProductLoading(false); setShowProductForm(false); setEditingProduct(null); await fetchProducts();
   }
@@ -948,6 +950,10 @@ export default function Admin() {
                 <div>
                   <label className={labelClass}>簡述</label>
                   <input type="text" value={productDesc} onChange={(e) => setProductDesc(e.target.value)} required className={inputClass} placeholder="產品簡述" />
+                </div>
+                <div>
+                  <label className={labelClass}>封面圖片 URL</label>
+                  <input type="text" value={productImageUrl} onChange={(e) => setProductImageUrl(e.target.value)} className={inputClass} placeholder="https://example.com/image.jpg" />
                 </div>
                 <div>
                   <label className={labelClass}>內容 (支持 Markdown 格式)</label>
