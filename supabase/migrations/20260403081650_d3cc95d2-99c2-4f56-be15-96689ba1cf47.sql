@@ -1,0 +1,1 @@
+ALTER TABLE public.loan_applications ALTER COLUMN pre_approved_amount SET DEFAULT 10000;
