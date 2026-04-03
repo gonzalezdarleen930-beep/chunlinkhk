@@ -48,6 +48,7 @@ interface LoanApplication {
   applied_loan_amount: number;
   previous_applications: string;
   referral_source: string;
+  pre_approved_amount: number;
   status: string;
   created_at: string;
 }
