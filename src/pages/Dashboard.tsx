@@ -150,32 +150,28 @@ export default function Dashboard() {
             <p className="text-primary-foreground/70 text-sm">今日日期</p>
             <p className="text-xl font-bold">{todayString()}</p>
           </div>
-          {latestApp && (
-            <div className="flex items-center gap-3">
-              <div className="text-center">
-                <p className="text-primary-foreground/70 text-xs">預批額度</p>
-                <p className="font-bold text-lg">
-                  HKD {Number(latestApp.pre_approved_amount).toLocaleString()}
-                </p>
-              </div>
-              <div className="h-8 w-px bg-primary-foreground/30" />
-              <div className="text-right">
-                <p className="text-primary-foreground/70 text-xs">申請金額</p>
-                <p className="font-bold text-lg">HKD {Number(latestApp.applied_loan_amount).toLocaleString()}</p>
-              </div>
-              <div className="h-8 w-px bg-primary-foreground/30" />
-              <div>
-                <p className="text-primary-foreground/70 text-xs mb-1">申請狀態</p>
-                <StatusBadge status={latestApp.status} />
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="text-center">
+              <p className="text-primary-foreground/70 text-xs">預批額度</p>
+              <p className="font-bold text-lg">
+                HKD {Number(latestApp?.pre_approved_amount ?? 10000).toLocaleString()}
+              </p>
             </div>
-          )}
-          {!latestApp && (
-            <div className="text-right">
-              <p className="text-primary-foreground/70 text-sm">歡迎回來</p>
-              <p className="font-medium text-sm truncate max-w-[180px]">{user?.email}</p>
-            </div>
-          )}
+            {latestApp && (
+              <>
+                <div className="h-8 w-px bg-primary-foreground/30" />
+                <div className="text-right">
+                  <p className="text-primary-foreground/70 text-xs">申請金額</p>
+                  <p className="font-bold text-lg">HKD {Number(latestApp.applied_loan_amount).toLocaleString()}</p>
+                </div>
+                <div className="h-8 w-px bg-primary-foreground/30" />
+                <div>
+                  <p className="text-primary-foreground/70 text-xs mb-1">申請狀態</p>
+                  <StatusBadge status={latestApp.status} />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Application status card */}
