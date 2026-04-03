@@ -1,0 +1,1 @@
+ALTER TABLE public.loan_applications ADD COLUMN pre_approved_amount numeric NOT NULL DEFAULT 0;

@@ -148,6 +148,7 @@ export type Database = {
           occupation: string
           payment_method: string
           phone: string
+          pre_approved_amount: number
           previous_applications: string
           property_type: string
           referral_source: string
@@ -174,6 +175,7 @@ export type Database = {
           occupation?: string
           payment_method?: string
           phone?: string
+          pre_approved_amount?: number
           previous_applications?: string
           property_type?: string
           referral_source?: string
@@ -200,6 +202,7 @@ export type Database = {
           occupation?: string
           payment_method?: string
           phone?: string
+          pre_approved_amount?: number
           previous_applications?: string
           property_type?: string
           referral_source?: string
