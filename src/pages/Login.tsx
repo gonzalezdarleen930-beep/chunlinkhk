@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
+import logoImg from "@/assets/logo.jpg";
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -29,9 +30,7 @@ export default function Login() {
       <div className="w-full max-w-md bg-card rounded-xl shadow-lg border border-border p-8">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center mb-3">
-            <span className="text-primary-foreground font-bold text-2xl">富</span>
-          </div>
+          <img src={logoImg} alt="富毅信貸有限公司" className="h-16 w-auto object-contain mb-3" />
           <div className="text-lg font-bold text-foreground">富毅信貸有限公司</div>
           <div className="text-xs text-muted-foreground">GRIT CREDIT LIMITED</div>
         </div>

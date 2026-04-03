@@ -16,8 +16,6 @@ interface LoanAccount {
   annual_interest_rate: number;
   loan_date: string;
   loan_expiry_date: string;
-  repayment_bank: string;
-  repayment_account: string;
   repayment_day: number;
 }
 
@@ -25,6 +23,8 @@ interface LoanApplication {
   id: string;
   status: string;
   applied_loan_amount: number;
+  pre_approved_amount: number;
+  name_chinese: string;
   created_at: string;
 }
 
@@ -81,7 +81,7 @@ export default function Dashboard() {
     async function fetchData() {
       const [{ data: loanData }, { data: appData }] = await Promise.all([
         supabase.from("loan_accounts").select("*").order("created_at", { ascending: false }),
-        supabase.from("loan_applications").select("id, status, applied_loan_amount, created_at").order("created_at", { ascending: false }),
+        supabase.from("loan_applications").select("id, status, applied_loan_amount, pre_approved_amount, name_chinese, created_at").order("created_at", { ascending: false }),
       ]);
       setLoans(loanData ?? []);
       setApplications(appData ?? []);
@@ -104,6 +104,7 @@ export default function Dashboard() {
   }
 
   const latestApp = applications[0];
+  const customerName = latestApp?.name_chinese || "";
 
   return (
     <div className="min-h-screen bg-muted">
@@ -122,9 +123,14 @@ export default function Dashboard() {
                 管理員面板
               </Link>
             )}
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <User size={14} />
-              <span className="hidden sm:inline truncate max-w-[150px]">{user?.email}</span>
+            <div className="flex flex-col items-end text-sm text-muted-foreground">
+              {customerName && (
+                <span className="font-medium text-foreground text-sm">{customerName}</span>
+              )}
+              <div className="flex items-center gap-1.5">
+                <User size={14} />
+                <span className="hidden sm:inline truncate max-w-[150px]">{user?.email}</span>
+              </div>
             </div>
             <button
               onClick={handleSignOut}
@@ -145,17 +151,22 @@ export default function Dashboard() {
             <p className="text-xl font-bold">{todayString()}</p>
           </div>
           {latestApp && (
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-primary-foreground/70 text-xs">申請金額</p>
-                  <p className="font-bold text-lg">HKD {Number(latestApp.applied_loan_amount).toLocaleString()}</p>
-                </div>
-                <div className="h-8 w-px bg-primary-foreground/30" />
-                <div>
-                  <p className="text-primary-foreground/70 text-xs mb-1">申請狀態</p>
-                  <StatusBadge status={latestApp.status} />
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="text-center">
+                <p className="text-primary-foreground/70 text-xs">預批額度</p>
+                <p className="font-bold text-lg">
+                  HKD {Number(latestApp.pre_approved_amount).toLocaleString()}
+                </p>
+              </div>
+              <div className="h-8 w-px bg-primary-foreground/30" />
+              <div className="text-right">
+                <p className="text-primary-foreground/70 text-xs">申請金額</p>
+                <p className="font-bold text-lg">HKD {Number(latestApp.applied_loan_amount).toLocaleString()}</p>
+              </div>
+              <div className="h-8 w-px bg-primary-foreground/30" />
+              <div>
+                <p className="text-primary-foreground/70 text-xs mb-1">申請狀態</p>
+                <StatusBadge status={latestApp.status} />
               </div>
             </div>
           )}
@@ -167,7 +178,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Application status card (if has applications) */}
+        {/* Application status card */}
         {applications.length > 0 && (
           <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-border">
@@ -199,7 +210,6 @@ export default function Dashboard() {
         ) : (
           loans.map((loan) => (
             <div key={loan.id} className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-              {/* Loan header */}
               <div className="bg-muted/50 border-b border-border px-6 py-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-xs text-muted-foreground">貸款編號</p>
@@ -211,7 +221,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Loan details grid */}
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { label: "貸款額", value: `HKD ${Number(loan.loan_amount).toLocaleString()}` },
@@ -222,8 +231,6 @@ export default function Dashboard() {
                   { label: "實際年利率", value: `${loan.annual_interest_rate}%` },
                   { label: "貸款日期", value: formatDate(loan.loan_date) },
                   { label: "貸款到期日", value: formatDate(loan.loan_expiry_date) },
-                  { label: "還款銀行", value: loan.repayment_bank },
-                  { label: "還款帳戶", value: loan.repayment_account },
                   { label: "還款日", value: `每月的第${loan.repayment_day}日` },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col gap-1 py-2 border-b border-border/50 last:border-0">
