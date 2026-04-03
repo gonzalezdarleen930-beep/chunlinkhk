@@ -1201,6 +1201,23 @@ export default function Admin() {
               ))}
             </div>
 
+            {/* Pre-approved amount editor */}
+            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+              <span className="text-xs font-medium text-foreground mr-1">預批額度：</span>
+              <span className="text-sm text-foreground">HKD</span>
+              <input
+                type="number"
+                defaultValue={viewApp.pre_approved_amount}
+                onBlur={async (e) => {
+                  const val = Number(e.target.value) || 0;
+                  await supabase.from("loan_applications").update({ pre_approved_amount: val }).eq("id", viewApp.id);
+                  setViewApp({ ...viewApp, pre_approved_amount: val });
+                  await fetchApplications();
+                }}
+                className="w-32 h-8 rounded-md border border-input bg-background px-2 text-sm"
+              />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               {[
                 { label: "中文姓名", value: viewApp.name_chinese },
