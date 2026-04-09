@@ -45,6 +45,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkAdmin(session.user.id);
       }
       setLoading(false);
+    }).catch(() => {
+      // If session restore fails (e.g. expired refresh token), clear state
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
+      setLoading(false);
     });
 
     // Then listen for subsequent changes (sign in/out) - NO await inside callback
