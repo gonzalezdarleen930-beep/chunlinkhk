@@ -156,8 +156,10 @@ export default function Admin() {
 
   // Site settings
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [thankYouMessage, setThankYouMessage] = useState("");
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [thankYouSaved, setThankYouSaved] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);

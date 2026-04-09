@@ -113,6 +113,16 @@ export default function Online() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  // Fetch thank-you message from site_settings
+  const [thankYouMsg, setThankYouMsg] = useState("登入方式會以電郵形式發送給你，請留意你填寫的電郵以及電話，客戶服務主任會盡快聯絡你。");
+  useEffect(() => {
+    if (submitted) {
+      supabase.from("site_settings").select("value").eq("key", "registration_thank_you").maybeSingle().then(({ data }) => {
+        if (data?.value) setThankYouMsg(data.value);
+      });
+    }
+  }, [submitted]);
+
   if (submitted) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -124,8 +134,8 @@ export default function Online() {
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-4">資料提交成功</h2>
             <div className="bg-card border border-border rounded-xl p-6 text-left space-y-3 mb-6">
-              <p className="text-foreground leading-relaxed">
-                登入方式會以電郵形式發送給你，請留意你填寫的電郵以及電話，客戶服務主任會盡快聯絡你。
+              <p className="text-foreground leading-relaxed whitespace-pre-line">
+                {thankYouMsg}
               </p>
             </div>
             <a href="/" className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity">

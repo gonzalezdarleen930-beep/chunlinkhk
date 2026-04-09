@@ -17,6 +17,8 @@ interface LoanAccount {
   loan_date: string;
   loan_expiry_date: string;
   repayment_day: number;
+  repayment_bank: string;
+  repayment_account: string;
 }
 
 interface LoanApplication {
@@ -270,6 +272,8 @@ export default function Dashboard() {
                   { label: "貸款日期", value: formatDate(loan.loan_date) },
                   { label: "貸款到期日", value: formatDate(loan.loan_expiry_date) },
                   { label: "還款日", value: `每月的第${loan.repayment_day}日` },
+                  { label: "還款銀行", value: loan.repayment_bank },
+                  { label: "還款帳戶", value: loan.repayment_account },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col gap-1 py-2 border-b border-border/50 last:border-0">
                     <span className="text-xs text-muted-foreground">{label}</span>
