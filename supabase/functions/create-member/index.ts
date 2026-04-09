@@ -11,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify caller is admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "未授權" }), {
@@ -26,7 +25,6 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Verify the calling user is an admin
     const token = authHeader.replace("Bearer ", "");
     const { data: { user: callerUser }, error: callerError } = await supabaseAdmin.auth.getUser(token);
 
@@ -51,7 +49,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password } = await req.json();
+    const { email, password, display_name } = await req.json();
 
     if (!email || !password) {
       return new Response(JSON.stringify({ error: "電郵和密碼為必填項" }), {
@@ -60,7 +58,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create the new user
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -79,6 +76,14 @@ Deno.serve(async (req) => {
       user_id: newUser.user.id,
       role: "member",
     });
+
+    // Create profile with display name
+    if (display_name) {
+      await supabaseAdmin.from("profiles").insert({
+        user_id: newUser.user.id,
+        display_name: display_name,
+      });
+    }
 
     return new Response(
       JSON.stringify({ success: true, user_id: newUser.user.id, email: newUser.user.email }),
