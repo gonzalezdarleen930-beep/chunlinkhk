@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound, FileText, Clock, CheckCircle, XCircle, HelpCircle, ArrowUp, ArrowDown, Package, Star } from "lucide-react";
+import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound, FileText, Clock, CheckCircle, XCircle, HelpCircle, ArrowUp, ArrowDown, Package, Star, Settings } from "lucide-react";
 import logoImg from "@/assets/logo.jpg";
 
 interface MemberUser {
@@ -123,7 +123,7 @@ export default function Admin() {
   const [loans, setLoans] = useState<LoanAccount[]>([]);
   const [applications, setApplications] = useState<LoanApplication[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs" | "products" | "advantages">("applications");
+  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs" | "products" | "advantages" | "settings">("applications");
 
   // FAQ management
   const [faqList, setFaqList] = useState<FaqItem[]>([]);
@@ -152,6 +152,11 @@ export default function Admin() {
   const [advTitle, setAdvTitle] = useState("");
   const [advDesc, setAdvDesc] = useState("");
   const [advLoading, setAdvLoading] = useState(false);
+
+  // Site settings
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);
