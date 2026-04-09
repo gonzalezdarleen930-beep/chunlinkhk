@@ -31,6 +31,15 @@ export default function Online() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [thankYouMsg, setThankYouMsg] = useState("登入方式會以電郵形式發送給你，請留意你填寫的電郵以及電話，客戶服務主任會盡快聯絡你。");
+
+  useEffect(() => {
+    if (submitted) {
+      supabase.from("site_settings").select("value").eq("key", "registration_thank_you").maybeSingle().then(({ data }) => {
+        if (data?.value) setThankYouMsg(data.value);
+      });
+    }
+  }, [submitted]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target;
