@@ -2,6 +2,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Online() {
   const [form, setForm] = useState({
@@ -14,6 +15,7 @@ export default function Online() {
     children: "",
     phone: "",
     email: "",
+    password: "",
     address: "",
     propertyType: "",
     cohabitants: "",
@@ -25,6 +27,7 @@ export default function Online() {
     referralSource: "",
     agreed: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -40,10 +43,31 @@ export default function Online() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.agreed) return;
+    if (!form.password || form.password.length < 6) {
+      setSubmitError("密碼必須至少6位字元");
+      return;
+    }
     setSubmitting(true);
     setSubmitError("");
 
+    // 1. Create auth account
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: { data: { display_name: form.nameChinese } },
+    });
+
+    if (signUpError) {
+      setSubmitting(false);
+      setSubmitError("建立帳號失敗：" + signUpError.message);
+      return;
+    }
+
+    const userId = signUpData.user?.id ?? null;
+
+    // 2. Insert application with user_id
     const { error } = await supabase.from("loan_applications").insert([{
+      user_id: userId,
       name_chinese: form.nameChinese,
       name_english: form.nameEnglish,
       hkid: form.hkid,
@@ -65,6 +89,17 @@ export default function Online() {
       referral_source: form.referralSource,
       status: "審批中",
     }]);
+
+    // 3. Also create profile + member role if account was created
+    if (userId) {
+      await Promise.all([
+        supabase.from("profiles").insert({ user_id: userId, display_name: form.nameChinese }),
+        supabase.from("user_roles").insert({ user_id: userId, role: "member" as const }),
+      ]);
+    }
+
+    // Sign out after submission so the page stays public
+    await supabase.auth.signOut();
 
     setSubmitting(false);
 
@@ -168,6 +203,29 @@ export default function Online() {
                 <div>
                   <label className={labelCls}>電郵地址 {requiredSpan}</label>
                   <input type="email" name="email" value={form.email} onChange={handleChange} required className={inputCls} placeholder="example@email.com" />
+                </div>
+                <div>
+                  <label className={labelCls}>設定登入密碼 {requiredSpan}</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                      minLength={6}
+                      className={inputCls + " pr-10"}
+                      placeholder="至少6位字元"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">此密碼將用於登入查看申請進度</p>
                 </div>
                 <div>
                   <label className={labelCls}>住宅地址 {requiredSpan}</label>
