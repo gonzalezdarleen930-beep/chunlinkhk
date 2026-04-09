@@ -10,6 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  VITE_SUPABASE_URL: https://vrklfliawibbzfdpbahl.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZya2xmbGlhd2liYnpmZHBiYWhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTg1NzMsImV4cCI6MjA4OTQ5NDU3M30.7H7Ehr1cR-tpexkQlF2tCd-2pUAVU7ZvVo2N9S2do4E
+
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -36,9 +40,6 @@ jobs:
 
       - name: Build site
         run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
