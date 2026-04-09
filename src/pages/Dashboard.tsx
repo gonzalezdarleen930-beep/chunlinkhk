@@ -79,13 +79,18 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
     async function fetchData() {
-      const [{ data: loanData }, { data: appData }] = await Promise.all([
-        supabase.from("loan_accounts").select("*").order("created_at", { ascending: false }),
-        supabase.from("loan_applications").select("id, status, applied_loan_amount, pre_approved_amount, name_chinese, created_at").order("created_at", { ascending: false }),
-      ]);
-      setLoans(loanData ?? []);
-      setApplications(appData ?? []);
-      setFetching(false);
+      try {
+        const [{ data: loanData }, { data: appData }] = await Promise.all([
+          supabase.from("loan_accounts").select("*").order("created_at", { ascending: false }),
+          supabase.from("loan_applications").select("id, status, applied_loan_amount, pre_approved_amount, name_chinese, created_at").order("created_at", { ascending: false }),
+        ]);
+        setLoans(loanData ?? []);
+        setApplications(appData ?? []);
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      } finally {
+        setFetching(false);
+      }
     }
     fetchData();
   }, [user]);
