@@ -8,6 +8,7 @@ import logoImg from "@/assets/logo.jpg";
 interface MemberUser {
   id: string;
   email: string;
+  display_name?: string;
 }
 
 interface LoanAccount {
@@ -162,6 +163,7 @@ export default function Admin() {
   const [showNewMember, setShowNewMember] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
   const [memberError, setMemberError] = useState("");
   const [memberLoading, setMemberLoading] = useState(false);
   const [memberSuccess, setMemberSuccess] = useState("");
@@ -382,7 +384,7 @@ export default function Admin() {
     setMemberLoading(true);
 
     const { data, error } = await supabase.functions.invoke("create-member", {
-      body: { email: newEmail, password: newPassword },
+      body: { email: newEmail, password: newPassword, display_name: newDisplayName },
     });
 
     if (error || data?.error) {
@@ -391,6 +393,7 @@ export default function Admin() {
       setMemberSuccess(`✅ 已成功建立會員：${data.email}`);
       setNewEmail("");
       setNewPassword("");
+      setNewDisplayName("");
       setShowNewMember(false);
       await fetchMembers();
     }
@@ -503,8 +506,11 @@ export default function Admin() {
     await fetchApplications();
   }
 
-  const getMemberEmail = (userId: string) =>
-    members.find((m) => m.id === userId)?.email ?? userId.slice(0, 12) + "...";
+  const getMemberEmail = (userId: string) => {
+    const m = members.find((m) => m.id === userId);
+    if (!m) return userId.slice(0, 12) + "...";
+    return m.display_name ? `${m.display_name} (${m.email})` : m.email;
+  };
 
   const filteredLoans =
     selectedMemberId === "all"
@@ -706,7 +712,11 @@ export default function Admin() {
             {showNewMember && (
               <form onSubmit={handleCreateMember} className="px-6 py-5 border-b border-border bg-muted/30 space-y-4">
                 <h3 className="text-sm font-semibold text-foreground">建立新會員帳號</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className={labelClass}>會員名稱</label>
+                    <input type="text" value={newDisplayName} onChange={(e) => setNewDisplayName(e.target.value)} className={inputClass} placeholder="客戶全名" />
+                  </div>
                   <div>
                     <label className={labelClass}>電郵地址</label>
                     <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required className={inputClass} placeholder="member@example.com" />
@@ -732,7 +742,8 @@ export default function Admin() {
                   return (
                     <div key={member.id} className="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="font-medium text-foreground truncate">{member.email}</span>
+                        <span className="font-medium text-foreground truncate">{member.display_name || member.email}</span>
+                        {member.display_name && <span className="text-xs text-muted-foreground truncate">{member.email}</span>}
                         <span className="text-xs text-muted-foreground">
                           {memberLoans.length > 0
                             ? `${memberLoans.length} 筆貸款 · 編號: ${memberLoans.map(l => l.loan_number).join(", ")}`

@@ -69,6 +69,7 @@ export default function Dashboard() {
   const [loans, setLoans] = useState<LoanAccount[]>([]);
   const [applications, setApplications] = useState<LoanApplication[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,12 +81,16 @@ export default function Dashboard() {
     if (!user) return;
     async function fetchData() {
       try {
-        const [{ data: loanData }, { data: appData }] = await Promise.all([
+        const [{ data: loanData }, { data: appData }, { data: profileData }] = await Promise.all([
           supabase.from("loan_accounts").select("*").order("created_at", { ascending: false }),
           supabase.from("loan_applications").select("id, status, applied_loan_amount, pre_approved_amount, name_chinese, created_at").order("created_at", { ascending: false }),
+          supabase.from("profiles").select("display_name").eq("user_id", user.id).maybeSingle(),
         ]);
         setLoans(loanData ?? []);
         setApplications(appData ?? []);
+        // Priority: profiles table > loan application name
+        const name = profileData?.display_name || (appData && appData.length > 0 ? appData[0].name_chinese : "");
+        setDisplayName(name);
       } catch (err) {
         console.error("Dashboard fetch error:", err);
       } finally {
@@ -109,7 +114,6 @@ export default function Dashboard() {
   }
 
   const latestApp = applications[0];
-  const customerName = latestApp?.name_chinese || "";
 
   return (
     <div className="min-h-screen bg-muted">
@@ -129,8 +133,8 @@ export default function Dashboard() {
               </Link>
             )}
             <div className="flex flex-col items-end text-sm text-muted-foreground">
-              {customerName && (
-                <span className="font-medium text-foreground text-sm">{customerName}</span>
+              {displayName && (
+                <span className="font-medium text-foreground text-sm">{displayName}</span>
               )}
               <div className="flex items-center gap-1.5">
                 <User size={14} />
