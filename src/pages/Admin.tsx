@@ -245,12 +245,19 @@ export default function Admin() {
     setAdvantageList((data ?? []) as AdvantageItem[]);
   }
 
+  async function fetchSettings() {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .eq("key", "whatsapp_number")
+      .maybeSingle();
+    if (data?.value) setWhatsappNumber(data.value);
+  }
+
   async function fetchData() {
     setFetching(true);
-    // Load DB data first (fast), then edge function (slower due to cold start)
-    await Promise.all([fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages()]);
+    await Promise.all([fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages(), fetchSettings()]);
     setFetching(false);
-    // Load members in background (edge function can be slow)
     fetchMembers();
   }
 
