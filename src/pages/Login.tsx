@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import logoImg from "@/assets/logo.jpg";
 
 export default function Login() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,10 +17,26 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const { error } = await signIn(email, password);
+
+    let loginEmail = identifier.trim();
+
+    // If input doesn't look like an email, treat as loan number
+    if (!loginEmail.includes("@")) {
+      const { data, error: lookupError } = await supabase.rpc("get_email_by_loan_number", {
+        _loan_number: loginEmail,
+      });
+      if (lookupError || !data) {
+        setLoading(false);
+        setError("找不到此貸款編號對應的帳戶，請重試。");
+        return;
+      }
+      loginEmail = data as string;
+    }
+
+    const { error } = await signIn(loginEmail, password);
     setLoading(false);
     if (error) {
-      setError("電郵或密碼錯誤，請重試。");
+      setError("電郵/貸款編號或密碼錯誤，請重試。");
     } else {
       navigate("/dashboard");
     }
@@ -39,14 +56,14 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">電郵地址</label>
+            <label className="block text-sm font-medium text-foreground mb-1">電郵地址 / 貸款編號</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
               className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="請輸入電郵地址"
+              placeholder="請輸入電郵地址或貸款編號"
             />
           </div>
           <div>
