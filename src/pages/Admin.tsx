@@ -156,8 +156,10 @@ export default function Admin() {
 
   // Site settings
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [thankYouMessage, setThankYouMessage] = useState("");
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [thankYouSaved, setThankYouSaved] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);
@@ -250,10 +252,13 @@ export default function Admin() {
   async function fetchSettings() {
     const { data } = await supabase
       .from("site_settings")
-      .select("key, value")
-      .eq("key", "whatsapp_number")
-      .maybeSingle();
-    if (data?.value) setWhatsappNumber(data.value);
+      .select("key, value");
+    if (data) {
+      for (const row of data) {
+        if (row.key === "whatsapp_number") setWhatsappNumber(row.value);
+        if (row.key === "registration_thank_you") setThankYouMessage(row.value);
+      }
+    }
   }
 
   async function fetchData() {
@@ -1225,6 +1230,46 @@ export default function Admin() {
                   </button>
                 </div>
                 {settingsSaved && <p className="text-xs text-green-600 mt-2">✓ 已儲存</p>}
+              </div>
+              {/* Thank you message */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">註冊感謝訊息</label>
+                <p className="text-xs text-muted-foreground mb-2">新客戶提交申請後顯示的訊息內容</p>
+                <textarea
+                  value={thankYouMessage}
+                  onChange={(e) => { setThankYouMessage(e.target.value); setThankYouSaved(false); }}
+                  className="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground text-sm min-h-[100px]"
+                  placeholder="登入方式會以電郵形式發送給你..."
+                />
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    disabled={settingsLoading}
+                    onClick={async () => {
+                      setSettingsLoading(true);
+                      const { data: existing } = await supabase
+                        .from("site_settings")
+                        .select("id")
+                        .eq("key", "registration_thank_you")
+                        .maybeSingle();
+                      if (existing) {
+                        await supabase
+                          .from("site_settings")
+                          .update({ value: thankYouMessage })
+                          .eq("key", "registration_thank_you");
+                      } else {
+                        await supabase
+                          .from("site_settings")
+                          .insert({ key: "registration_thank_you", value: thankYouMessage });
+                      }
+                      setSettingsLoading(false);
+                      setThankYouSaved(true);
+                    }}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {settingsLoading ? "儲存中..." : "儲存"}
+                  </button>
+                  {thankYouSaved && <span className="text-xs text-green-600">✓ 已儲存</span>}
+                </div>
               </div>
             </div>
           </section>
