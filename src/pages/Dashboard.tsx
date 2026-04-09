@@ -25,6 +25,23 @@ interface LoanApplication {
   applied_loan_amount: number;
   pre_approved_amount: number;
   name_chinese: string;
+  name_english: string;
+  hkid: string;
+  dob: string;
+  gender: string;
+  marital_status: string;
+  children: string;
+  phone: string;
+  email: string;
+  address: string;
+  property_type: string;
+  cohabitants: string;
+  occupation: string;
+  monthly_salary: number;
+  payment_method: string;
+  loan_amount: number;
+  previous_applications: string;
+  referral_source: string;
   created_at: string;
 }
 
@@ -83,7 +100,7 @@ export default function Dashboard() {
       try {
         const [{ data: loanData }, { data: appData }, { data: profileData }] = await Promise.all([
           supabase.from("loan_accounts").select("*").order("created_at", { ascending: false }),
-          supabase.from("loan_applications").select("id, status, applied_loan_amount, pre_approved_amount, name_chinese, created_at").order("created_at", { ascending: false }),
+          supabase.from("loan_applications").select("*").order("created_at", { ascending: false }),
           supabase.from("profiles").select("display_name").eq("user_id", user.id).maybeSingle(),
         ]);
         setLoans(loanData ?? []);
@@ -183,29 +200,45 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Application status card */}
-        {applications.length > 0 && (
-          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-border">
-              <h2 className="font-semibold text-foreground text-sm">貸款申請狀態</h2>
+        {/* Application details */}
+        {applications.map((app) => (
+          <div key={app.id} className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-semibold text-foreground text-sm">貸款申請詳情</h2>
+              <StatusBadge status={app.status} />
             </div>
-            <div className="divide-y divide-border">
-              {applications.map((app) => (
-                <div key={app.id} className="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">申請日期</p>
-                    <p className="text-sm font-medium text-foreground">{formatDate(app.created_at)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">申請金額</p>
-                    <p className="text-sm font-semibold text-foreground">HKD {Number(app.applied_loan_amount).toLocaleString()}</p>
-                  </div>
-                  <StatusBadge status={app.status} />
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { label: "中文姓名", value: app.name_chinese },
+                { label: "英文姓名", value: app.name_english },
+                { label: "身份證號碼", value: app.hkid },
+                { label: "出生日期", value: app.dob },
+                { label: "性別", value: app.gender },
+                { label: "婚姻狀況", value: app.marital_status },
+                { label: "子女數目", value: app.children },
+                { label: "聯絡電話", value: app.phone },
+                { label: "電郵地址", value: app.email },
+                { label: "住宅地址", value: app.address },
+                { label: "物業類型", value: app.property_type },
+                { label: "同住人數", value: app.cohabitants },
+                { label: "職業", value: app.occupation },
+                { label: "每月收入", value: `HKD ${Number(app.monthly_salary).toLocaleString()}` },
+                { label: "出糧方式", value: app.payment_method },
+                { label: "申請金額", value: `HKD ${Number(app.applied_loan_amount).toLocaleString()}` },
+                { label: "貸款金額", value: `HKD ${Number(app.loan_amount).toLocaleString()}` },
+                { label: "預批額度", value: `HKD ${Number(app.pre_approved_amount).toLocaleString()}` },
+                { label: "曾否申請貸款", value: app.previous_applications },
+                { label: "轉介來源", value: app.referral_source },
+                { label: "申請日期", value: formatDate(app.created_at) },
+              ].filter(item => item.value && item.value !== "HKD 0").map(({ label, value }) => (
+                <div key={label} className="flex flex-col gap-1 py-2 border-b border-border/50 last:border-0">
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                  <span className="font-semibold text-foreground">{value}</span>
                 </div>
               ))}
             </div>
           </div>
-        )}
+        ))}
 
         {/* Loan accounts */}
         {loans.length === 0 ? (
