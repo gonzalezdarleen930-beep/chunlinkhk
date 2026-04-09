@@ -56,15 +56,16 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">電郵地址</label>
+            <label className="block text-sm font-medium text-foreground mb-1">電郵地址 / 貸款編號</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
               className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="請輸入電郵地址"
+              placeholder="請輸入電郵地址或貸款編號"
             />
+          </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">密碼</label>
