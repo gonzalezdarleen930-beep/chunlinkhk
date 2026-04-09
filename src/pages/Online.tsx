@@ -205,6 +205,29 @@ export default function Online() {
                   <input type="email" name="email" value={form.email} onChange={handleChange} required className={inputCls} placeholder="example@email.com" />
                 </div>
                 <div>
+                  <label className={labelCls}>設定登入密碼 {requiredSpan}</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                      minLength={6}
+                      className={inputCls + " pr-10"}
+                      placeholder="至少6位字元"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">此密碼將用於登入查看申請進度</p>
+                </div>
+                <div>
                   <label className={labelCls}>住宅地址 {requiredSpan}</label>
                   <input type="text" name="address" value={form.address} onChange={handleChange} required className={inputCls} placeholder="請輸入住宅地址" />
                 </div>
