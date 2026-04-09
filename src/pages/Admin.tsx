@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound, FileText, Clock, CheckCircle, XCircle, HelpCircle, ArrowUp, ArrowDown, Package, Star } from "lucide-react";
+import { Plus, Trash2, Edit2, X, Check, LogOut, Users, CreditCard, ChevronDown, KeyRound, FileText, Clock, CheckCircle, XCircle, HelpCircle, ArrowUp, ArrowDown, Package, Star, Settings } from "lucide-react";
 import logoImg from "@/assets/logo.jpg";
 
 interface MemberUser {
@@ -123,7 +123,7 @@ export default function Admin() {
   const [loans, setLoans] = useState<LoanAccount[]>([]);
   const [applications, setApplications] = useState<LoanApplication[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs" | "products" | "advantages">("applications");
+  const [activeTab, setActiveTab] = useState<"members" | "loans" | "applications" | "faqs" | "products" | "advantages" | "settings">("applications");
 
   // FAQ management
   const [faqList, setFaqList] = useState<FaqItem[]>([]);
@@ -152,6 +152,11 @@ export default function Admin() {
   const [advTitle, setAdvTitle] = useState("");
   const [advDesc, setAdvDesc] = useState("");
   const [advLoading, setAdvLoading] = useState(false);
+
+  // Site settings
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   // New member form
   const [showNewMember, setShowNewMember] = useState(false);
@@ -240,12 +245,19 @@ export default function Admin() {
     setAdvantageList((data ?? []) as AdvantageItem[]);
   }
 
+  async function fetchSettings() {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .eq("key", "whatsapp_number")
+      .maybeSingle();
+    if (data?.value) setWhatsappNumber(data.value);
+  }
+
   async function fetchData() {
     setFetching(true);
-    // Load DB data first (fast), then edge function (slower due to cold start)
-    await Promise.all([fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages()]);
+    await Promise.all([fetchLoans(), fetchApplications(), fetchFaqs(), fetchProducts(), fetchAdvantages(), fetchSettings()]);
     setFetching(false);
-    // Load members in background (edge function can be slow)
     fetchMembers();
   }
 
@@ -583,6 +595,7 @@ export default function Admin() {
             { key: "products", label: "貸款項目", icon: <Package size={14} /> },
             { key: "advantages", label: "服務優勢", icon: <Star size={14} /> },
             { key: "faqs", label: "問題中心", icon: <HelpCircle size={14} /> },
+            { key: "settings", label: "網站設定", icon: <Settings size={14} /> },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -1164,6 +1177,47 @@ export default function Admin() {
           </div>
         </div>
       )}
+
+        {/* ===== SETTINGS TAB ===== */}
+        {activeTab === "settings" && (
+          <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center gap-2">
+              <Settings size={16} className="text-primary" />
+              <h2 className="font-semibold text-foreground">網站設定</h2>
+            </div>
+            <div className="px-6 py-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">WhatsApp 電話號碼</label>
+                <p className="text-xs text-muted-foreground mb-2">格式：國家碼+電話號碼，例如 85296396851</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={whatsappNumber}
+                    onChange={(e) => { setWhatsappNumber(e.target.value); setSettingsSaved(false); }}
+                    className="w-full max-w-xs px-3 py-2 rounded-md border border-input bg-background text-foreground text-sm"
+                    placeholder="85296396851"
+                  />
+                  <button
+                    disabled={settingsLoading}
+                    onClick={async () => {
+                      setSettingsLoading(true);
+                      await supabase
+                        .from("site_settings")
+                        .update({ value: whatsappNumber })
+                        .eq("key", "whatsapp_number");
+                      setSettingsLoading(false);
+                      setSettingsSaved(true);
+                    }}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {settingsLoading ? "儲存中..." : "儲存"}
+                  </button>
+                </div>
+                {settingsSaved && <p className="text-xs text-green-600 mt-2">✓ 已儲存</p>}
+              </div>
+            </div>
+          </section>
+        )}
 
       {/* Application Detail Modal */}
       {viewApp && (

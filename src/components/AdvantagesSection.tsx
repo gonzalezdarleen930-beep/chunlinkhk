@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-
-const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
 
 interface Advantage {
   id: string;
@@ -51,14 +50,12 @@ export default function AdvantagesSection() {
               </div>
               <h3 className="text-lg font-bold text-primary mb-3">{item.title}</h3>
               <p className="text-sm text-muted-foreground mb-5">{item.description}</p>
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/online"
                 className="inline-flex items-center justify-center px-5 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
               >
                 立即申請
-              </a>
+              </Link>
             </div>
           ))}
         </div>

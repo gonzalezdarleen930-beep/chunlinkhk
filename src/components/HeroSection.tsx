@@ -1,7 +1,6 @@
 import heroBanner from "@/assets/hero-banner.jpg";
 import { useState } from "react";
-
-const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
+import { Link } from "react-router-dom";
 
 const MONTHS = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120];
 
@@ -42,14 +41,12 @@ export default function HeroSection() {
             <p className="text-background/90 text-sm mb-6">
               我們一直為客戶財務方面提供專業服務。
             </p>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/online"
               className="inline-flex items-center justify-center w-full px-6 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
             >
               立即申請
-            </a>
+            </Link>
           </div>
         </div>
       </section>
