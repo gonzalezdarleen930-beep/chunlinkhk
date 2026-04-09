@@ -595,6 +595,7 @@ export default function Admin() {
             { key: "products", label: "貸款項目", icon: <Package size={14} /> },
             { key: "advantages", label: "服務優勢", icon: <Star size={14} /> },
             { key: "faqs", label: "問題中心", icon: <HelpCircle size={14} /> },
+            { key: "settings", label: "網站設定", icon: <Settings size={14} /> },
           ].map((tab) => (
             <button
               key={tab.key}
