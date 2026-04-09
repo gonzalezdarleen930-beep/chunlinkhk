@@ -8,6 +8,7 @@ import logoImg from "@/assets/logo.jpg";
 interface MemberUser {
   id: string;
   email: string;
+  display_name?: string;
 }
 
 interface LoanAccount {
@@ -162,6 +163,7 @@ export default function Admin() {
   const [showNewMember, setShowNewMember] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
   const [memberError, setMemberError] = useState("");
   const [memberLoading, setMemberLoading] = useState(false);
   const [memberSuccess, setMemberSuccess] = useState("");
@@ -382,7 +384,7 @@ export default function Admin() {
     setMemberLoading(true);
 
     const { data, error } = await supabase.functions.invoke("create-member", {
-      body: { email: newEmail, password: newPassword },
+      body: { email: newEmail, password: newPassword, display_name: newDisplayName },
     });
 
     if (error || data?.error) {
@@ -391,6 +393,7 @@ export default function Admin() {
       setMemberSuccess(`✅ 已成功建立會員：${data.email}`);
       setNewEmail("");
       setNewPassword("");
+      setNewDisplayName("");
       setShowNewMember(false);
       await fetchMembers();
     }
@@ -503,8 +506,11 @@ export default function Admin() {
     await fetchApplications();
   }
 
-  const getMemberEmail = (userId: string) =>
-    members.find((m) => m.id === userId)?.email ?? userId.slice(0, 12) + "...";
+  const getMemberEmail = (userId: string) => {
+    const m = members.find((m) => m.id === userId);
+    if (!m) return userId.slice(0, 12) + "...";
+    return m.display_name ? `${m.display_name} (${m.email})` : m.email;
+  };
 
   const filteredLoans =
     selectedMemberId === "all"
