@@ -66,7 +66,6 @@ export default function Login() {
               placeholder="請輸入電郵地址或貸款編號"
             />
           </div>
-          </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">密碼</label>
             <input
