@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import logoImg from "@/assets/logo.jpg";
 
 export default function Login() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,10 +17,26 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const { error } = await signIn(email, password);
+
+    let loginEmail = identifier.trim();
+
+    // If input doesn't look like an email, treat as loan number
+    if (!loginEmail.includes("@")) {
+      const { data, error: lookupError } = await supabase.rpc("get_email_by_loan_number", {
+        _loan_number: loginEmail,
+      });
+      if (lookupError || !data) {
+        setLoading(false);
+        setError("找不到此貸款編號對應的帳戶，請重試。");
+        return;
+      }
+      loginEmail = data as string;
+    }
+
+    const { error } = await signIn(loginEmail, password);
     setLoading(false);
     if (error) {
-      setError("電郵或密碼錯誤，請重試。");
+      setError("電郵/貸款編號或密碼錯誤，請重試。");
     } else {
       navigate("/dashboard");
     }
