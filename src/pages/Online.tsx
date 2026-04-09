@@ -15,6 +15,7 @@ export default function Online() {
     children: "",
     phone: "",
     email: "",
+    password: "",
     address: "",
     propertyType: "",
     cohabitants: "",
@@ -26,6 +27,7 @@ export default function Online() {
     referralSource: "",
     agreed: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
