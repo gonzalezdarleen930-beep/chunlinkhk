@@ -25,7 +25,6 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Verify caller is admin
     const token = authHeader.replace("Bearer ", "");
     const { data: { user: callerUser }, error: callerError } = await supabaseAdmin.auth.getUser(token);
     if (callerError || !callerUser) {
@@ -49,7 +48,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get all member user_ids from user_roles
     const { data: memberRoles, error: rolesError } = await supabaseAdmin
       .from("user_roles")
       .select("user_id")
@@ -62,10 +60,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch all members in parallel instead of sequentially
+    // Fetch profiles for all members
+    const memberIds = (memberRoles ?? []).map(r => r.user_id);
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, display_name")
+      .in("user_id", memberIds.length > 0 ? memberIds : ["__none__"]);
+
+    const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p.display_name]));
+
     const memberPromises = (memberRoles ?? []).map(async ({ user_id }) => {
       const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(user_id);
-      return user ? { id: user.id, email: user.email } : null;
+      return user ? { id: user.id, email: user.email, display_name: profileMap.get(user.id) || "" } : null;
     });
 
     const results = await Promise.all(memberPromises);
