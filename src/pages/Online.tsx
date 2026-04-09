@@ -140,7 +140,7 @@ export default function Online() {
                 {thankYouMsg}
               </p>
             </div>
-            <a href="/" className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity">
+            <a href={import.meta.env.BASE_URL} className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity">
               返回首頁
             </a>
           </div>
