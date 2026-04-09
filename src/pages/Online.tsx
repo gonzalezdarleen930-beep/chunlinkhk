@@ -43,10 +43,31 @@ export default function Online() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.agreed) return;
+    if (!form.password || form.password.length < 6) {
+      setSubmitError("密碼必須至少6位字元");
+      return;
+    }
     setSubmitting(true);
     setSubmitError("");
 
+    // 1. Create auth account
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: { data: { display_name: form.nameChinese } },
+    });
+
+    if (signUpError) {
+      setSubmitting(false);
+      setSubmitError("建立帳號失敗：" + signUpError.message);
+      return;
+    }
+
+    const userId = signUpData.user?.id ?? null;
+
+    // 2. Insert application with user_id
     const { error } = await supabase.from("loan_applications").insert([{
+      user_id: userId,
       name_chinese: form.nameChinese,
       name_english: form.nameEnglish,
       hkid: form.hkid,
@@ -68,6 +89,17 @@ export default function Online() {
       referral_source: form.referralSource,
       status: "審批中",
     }]);
+
+    // 3. Also create profile + member role if account was created
+    if (userId) {
+      await Promise.all([
+        supabase.from("profiles").insert({ user_id: userId, display_name: form.nameChinese }),
+        supabase.from("user_roles").insert({ user_id: userId, role: "member" as const }),
+      ]);
+    }
+
+    // Sign out after submission so the page stays public
+    await supabase.auth.signOut();
 
     setSubmitting(false);
 
