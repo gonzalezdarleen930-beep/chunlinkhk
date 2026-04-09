@@ -1178,6 +1178,47 @@ export default function Admin() {
         </div>
       )}
 
+        {/* ===== SETTINGS TAB ===== */}
+        {activeTab === "settings" && (
+          <section className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center gap-2">
+              <Settings size={16} className="text-primary" />
+              <h2 className="font-semibold text-foreground">網站設定</h2>
+            </div>
+            <div className="px-6 py-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">WhatsApp 電話號碼</label>
+                <p className="text-xs text-muted-foreground mb-2">格式：國家碼+電話號碼，例如 85296396851</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={whatsappNumber}
+                    onChange={(e) => { setWhatsappNumber(e.target.value); setSettingsSaved(false); }}
+                    className="w-full max-w-xs px-3 py-2 rounded-md border border-input bg-background text-foreground text-sm"
+                    placeholder="85296396851"
+                  />
+                  <button
+                    disabled={settingsLoading}
+                    onClick={async () => {
+                      setSettingsLoading(true);
+                      await supabase
+                        .from("site_settings")
+                        .update({ value: whatsappNumber })
+                        .eq("key", "whatsapp_number");
+                      setSettingsLoading(false);
+                      setSettingsSaved(true);
+                    }}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {settingsLoading ? "儲存中..." : "儲存"}
+                  </button>
+                </div>
+                {settingsSaved && <p className="text-xs text-green-600 mt-2">✓ 已儲存</p>}
+              </div>
+            </div>
+          </section>
+        )}
+
       {/* Application Detail Modal */}
       {viewApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-8 overflow-y-auto">
