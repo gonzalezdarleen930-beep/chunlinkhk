@@ -1,29 +1,39 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logoImg from "@/assets/logo.jpg";
 
-const WHATSAPP_URL = "https://wa.me/85296396851?text=你好，我想查詢貸款內容";
-
 export default function Footer() {
+  const [whatsappNumber, setWhatsappNumber] = useState("85296396851");
+
+  useEffect(() => {
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "whatsapp_number")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setWhatsappNumber(data.value);
+      });
+  }, []);
+
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=你好，我想查詢貸款內容`;
+
   return (
     <footer className="bg-foreground text-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-start gap-8">
-          {/* Logo & description */}
           <div className="flex-1">
-          <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <img src={logoImg} alt="富毅信貸有限公司" className="h-10 w-auto object-contain" />
             </div>
             <p className="text-sm opacity-70 mb-3">放債人牌照號碼: 1841/2025</p>
-            <a
-              href="/PrivacyPolicy"
-              className="text-sm opacity-70 hover:opacity-100 underline"
-            >
+            <a href="/PrivacyPolicy" className="text-sm opacity-70 hover:opacity-100 underline">
               忠告：借錢梗要還，咪俾錢中介<br />
               投訴電話 : 96396851
             </a>
           </div>
 
-          {/* Links */}
           <div className="flex-shrink-0">
             <h4 className="text-sm font-semibold mb-3 opacity-80">網站連結</h4>
             <ul className="space-y-2">
@@ -35,10 +45,7 @@ export default function Footer() {
                 { label: "放債人條例", href: "/MoneyLendersOrdinance" },
               ].map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-sm opacity-70 hover:opacity-100 hover:text-primary transition-colors"
-                  >
+                  <Link to={link.href} className="text-sm opacity-70 hover:opacity-100 hover:text-primary transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -46,7 +53,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
           <div className="flex-shrink-0">
             <h4 className="text-sm font-semibold mb-3 opacity-80">聯絡方式</h4>
             <ul className="space-y-2 text-sm opacity-70">
@@ -65,7 +71,7 @@ export default function Footer() {
       {/* Floating WhatsApp Button */}
       <div className="fixed right-4 bottom-24 z-50 flex flex-col gap-2">
         <a
-          href={WHATSAPP_URL}
+          href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
